@@ -1,0 +1,65 @@
+# Editors and OS
+.DS_Store
+.idea/
+.vscode/
+*.swp
+
+# Logs
+*.log
+logs/
+
+# Secrets and local environment (never commit)
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Data: nothing under data/ is versioned except its README (see data/README.md)
+data/*
+!data/README.md
+
+# Python
+.venv/
+venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+dist/
+build/
+*.egg-info/
+
+# Dagster and dbt local state
+.dagster/
+dagster_home/
+target/
+dbt_packages/
+logs/
+
+# Node
+node_modules/
+.next/
+out/
+.evidence/
+.svelte-kit/
+
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfvars
+!*.tfvars.example
+crash.log
+
+# Local AWS stand-in and container volumes
+.aws-emulator/
+.minio/
+infra/docker/.env
+infra/docker/volumes/
+
+# Local tools
+.tools/
