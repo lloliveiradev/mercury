@@ -1,0 +1,12 @@
+node_modules/
+.venv/
+dist/
+build/
+.next/
+.evidence/
+out/
+coverage/
+data/
+target/
+dbt_packages/
+*.generated.*

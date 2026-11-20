@@ -1,0 +1,50 @@
+name: Bug report
+description: Report a defect in Mercury
+labels: ['bug']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Security vulnerabilities do not belong in a public issue. Use **Report a vulnerability** on the Security tab (see SECURITY.md).
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      description: Pick the closest one.
+      options:
+        - datasets
+        - pipelines
+        - geo
+        - quality
+        - findings
+        - marts
+        - report
+        - web
+        - infra
+        - ci
+        - security
+        - docs
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to reproduce
+      description: Smallest sequence that triggers the bug.
+      placeholder: |
+        1. ...
+        2. ...
+        3. ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected and actual behaviour
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: OS, Docker version, data window used, commit hash.

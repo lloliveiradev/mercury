@@ -1,0 +1,20 @@
+name: Feature or dataset request
+description: Propose a capability or a new dataset
+labels: ['enhancement']
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Question or problem
+      description: What would you like Mercury to answer or do, and why?
+    validations:
+      required: true
+  - type: textarea
+    id: data
+    attributes:
+      label: Data involved
+      description: For a new dataset, give the source, its terms of use and the grain (what one row is, and where and when).
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
