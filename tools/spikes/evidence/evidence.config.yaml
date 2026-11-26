@@ -1,0 +1,5 @@
+project:
+  name: Mercury Web
+  evidence: '0.12.2'
+
+pages: ./pages

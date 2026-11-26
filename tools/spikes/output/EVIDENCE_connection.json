@@ -1,0 +1,8 @@
+{
+    "last_checked_at": "2026-11-26T20:50:50Z",
+    "validates_successfully": true,
+    "reads_from_clickhouse": true,
+    "reads_from_parquet": true,
+    "clickhouse_can_read_parquet": true,
+    "notes": []
+}
