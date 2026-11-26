@@ -14,3 +14,6 @@ dbt_packages/
 # Vendored agent skills: kept as published upstream
 .agents/
 skills-lock.json
+
+# Spike outputs are written by the check scripts
+tools/spikes/output/
