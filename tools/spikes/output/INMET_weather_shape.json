@@ -1,0 +1,27 @@
+{
+    "last_checked_at": "2026-11-26T19:36:40Z",
+    "is_parseable": true,
+    "has_station_data": true,
+    "is_hours_utc": true,
+    "is_hours_diff_1_hour": true,
+    "station_sample": [
+        {
+            "region": "NE",
+            "uf": "MA",
+            "station": "SAO LUIS",
+            "wmo_code": "A203",
+            "latitude": -2.52666666,
+            "longitude": -44.21361111,
+            "altitude": 54.8,
+            "foundation_date": "2003-01-29"
+        }
+    ],
+    "hours_sample": [
+        "0000 UTC",
+        "0100 UTC",
+        "0200 UTC",
+        "0300 UTC",
+        "0400 UTC"
+    ],
+    "notes": []
+}

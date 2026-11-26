@@ -1,0 +1,50 @@
+{
+    "last_checked_at": "2026-11-26T18:58:50Z",
+    "files_count": 4,
+    "records_count": 278103,
+    "size": "77.3 MiB",
+    "duration": "27.5 s",
+    "failed": [],
+    "aborted": null,
+    "notes": [],
+    "2022": {
+        "records_count": 64606,
+        "size": "17.9 MiB",
+        "size_bytes": 18723306,
+        "sha256": "d11bbfdec9b5df6f08a083c63acb2c1b4d3bad71d31481d7ce1368d5fa38783a",
+        "retrieved_at": "2026-11-26T18:58:27Z",
+        "source_file": "datatran2022.zip",
+        "source_sha256": "5ace05699b82c720e47e28768323630310ef7fe300db57388da246fb448c8855",
+        "duration": "4.99 s"
+    },
+    "2023": {
+        "records_count": 67766,
+        "size": "18.9 MiB",
+        "size_bytes": 19770946,
+        "sha256": "2e6a9eac714524822fc3150be4d0614e27c7f14aa674520c94e5d2e4089356dd",
+        "retrieved_at": "2026-11-26T18:58:35Z",
+        "source_file": "datatran2023.zip",
+        "source_sha256": "b233c47d16b3980a6692472f9fe1bbab57698700fbb918d22628a5c0a382d985",
+        "duration": "5.34 s"
+    },
+    "2024": {
+        "records_count": 73202,
+        "size": "20.4 MiB",
+        "size_bytes": 21365616,
+        "sha256": "7d26e6f4528c2ca2636a8fea2c5bc8755a0ff6a182d82c238a8793b016e4366d",
+        "retrieved_at": "2026-11-26T18:58:42Z",
+        "source_file": "datatran2024.zip",
+        "source_sha256": "905dac836867297b261e4edefff6cdb470809814e7e1796b3f2f57517099d165",
+        "duration": "5.29 s"
+    },
+    "2025": {
+        "records_count": 72529,
+        "size": "20.2 MiB",
+        "size_bytes": 21143436,
+        "sha256": "bb844d45a07b5b50f5f76011e28f47e370fa6742e9211edac5510dcbe72ce4d8",
+        "retrieved_at": "2026-11-26T18:58:50Z",
+        "source_file": "datatran2025.zip",
+        "source_sha256": "52c8a631ac9d428bf845e2fa996b8c61f66b219f7014a61d292f9d95d186bb0f",
+        "duration": "5.83 s"
+    }
+}
