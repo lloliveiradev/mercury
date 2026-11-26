@@ -10,3 +10,7 @@ data/
 target/
 dbt_packages/
 *.generated.*
+
+# Vendored agent skills: kept as published upstream
+.agents/
+skills-lock.json
