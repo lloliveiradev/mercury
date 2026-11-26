@@ -1,0 +1,30 @@
+name: postgresql-postgis
+
+services:
+  postgres:
+    build: .
+    restart: unless-stopped
+    command: ['postgres', '-c', 'shared_preload_libraries=pg_stat_statements']
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-mercury}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-mercury}
+      POSTGRES_DB: ${POSTGRES_DB:-mercury}
+    ports:
+      # 15432 on the host, 5432 inside. Postgres keeps its listen port.
+      - '${POSTGRES_PORT:-15432}:5432'
+    volumes:
+      - postgres-data:/var/lib/postgresql
+      - ./initdb:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      # TCP on purpose: the temporary server used during first init only listens on the socket.
+      test:
+        [
+          'CMD-SHELL',
+          'pg_isready -h 127.0.0.1 -U ${POSTGRES_USER:-mercury} -d ${POSTGRES_DB:-mercury}',
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+
+volumes:
+  postgres-data:

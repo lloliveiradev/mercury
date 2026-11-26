@@ -1,0 +1,20 @@
+# The emulator certificate names 127.0.0.1. ClickHouse joins that network
+# namespace so s3() can dial that address and still verify the certificate.
+services:
+  aws-emulator:
+    ports:
+      - '${CLICKHOUSE_HTTP_PORT:-18123}:8123'
+      - '${CLICKHOUSE_NATIVE_PORT:-19000}:9000'
+
+  clickhouse:
+    network_mode: 'service:aws-emulator'
+    depends_on:
+      aws-emulator:
+        condition: service_healthy
+    ports: !reset []
+    entrypoint: ['/bin/bash', '/entrypoint-emulator.sh']
+    volumes:
+      - ./docker/clickhouse/emulator.xml:/etc/clickhouse-server/config.d/emulator.xml:ro
+      - ./docker/clickhouse/entrypoint.sh:/entrypoint-emulator.sh:ro
+      - ${EMULATOR_HOME:-${HOME}}/.aws/emulator/${EMULATOR_PORT:-9297}:/run/emulator-ca:ro
+      - ./evidence/sources/parquets:/var/lib/clickhouse/user_files
