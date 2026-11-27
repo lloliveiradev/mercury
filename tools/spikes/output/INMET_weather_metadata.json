@@ -1,15 +1,16 @@
 {
     "last_checked_at": "2026-11-26T19:20:44Z",
-    "files_count": 2293,
-    "records_count": 19899048,
-    "size": "1.5 GiB",
-    "duration": "59.0 s",
+    "time_to_process": "59.0 s",
+    "peak_memory": null,
+    "total_files": 2293,
+    "total_records": 19899048,
+    "total_size": "1.5 GiB",
     "failed": [],
     "aborted": null,
     "notes": [],
     "2022": {
-        "files_count": 567,
-        "records_count": 4948920,
+        "files": 567,
+        "records": 4948920,
         "size": "354.7 MiB",
         "size_bytes": 371900715,
         "source_url": "https://portal.inmet.gov.br/uploads/dadoshistoricos/2022.zip",
@@ -19,8 +20,8 @@
         "duration": "14.1 s"
     },
     "2023": {
-        "files_count": 567,
-        "records_count": 4966920,
+        "files": 567,
+        "records": 4966920,
         "size": "396.3 MiB",
         "size_bytes": 415560362,
         "source_url": "https://portal.inmet.gov.br/uploads/dadoshistoricos/2023.zip",
@@ -30,8 +31,8 @@
         "duration": "9.96 s"
     },
     "2024": {
-        "files_count": 565,
-        "records_count": 4962960,
+        "files": 565,
+        "records": 4962960,
         "size": "386.7 MiB",
         "size_bytes": 405471533,
         "source_url": "https://portal.inmet.gov.br/uploads/dadoshistoricos/2024.zip",
@@ -41,8 +42,8 @@
         "duration": "8.11 s"
     },
     "2025": {
-        "files_count": 594,
-        "records_count": 5020248,
+        "files": 594,
+        "records": 5020248,
         "size": "359.2 MiB",
         "size_bytes": 376671813,
         "source_url": "https://portal.inmet.gov.br/uploads/dadoshistoricos/2025.zip",

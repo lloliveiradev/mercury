@@ -8,6 +8,7 @@ Evidence:
 
 from __future__ import annotations
 
+import argparse
 import dagster as dg
 import io
 import json
@@ -19,13 +20,33 @@ from dagster_aws.s3 import S3PickleIOManager
 from pathlib import Path
 from typing import Optional
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # tools/spikes, for _utils
+
 from _aws import s3, BUCKET, get_emulator_access, _s3
 from _clickhouse import ClickHouse
-from _utils import INMET_WEATHER_DIR, OUTPUT_DIR, STG_DATA_DIR, _size, _duration
+from _utils import (
+    INMET_WEATHER_DIR,
+    OUTPUT_DIR,
+    STG_DATA_DIR,
+    _size,
+    _duration,
+    _peak_memory,
+)
 
-PARQUET_PATH = "raw/brazil/INMET/waether"
+PARQUET_PATH = "raw/brazil/INMET/weather"
 TEXT_COLUMNS = {"Data", "Hora UTC"}
 NOTES = []
+
+
+def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description="Check AWS Emulator.")
+    parser.add_argument(
+        "--force",
+        action="store_true",
+        default=False,
+        help="Forces persistence of parquet files in the staging directory",
+    )
+    return parser.parse_args(argv)
 
 
 def _measurements(df: pd.DataFrame) -> pd.DataFrame:
@@ -88,8 +109,9 @@ def format_inmet_file(f: Path, year: str) -> Optional[pd.DataFrame]:
         return None
 
 
-def _s3_put_object(path: str, body: bytes, started_at: float) -> Optional[dict]:
+def _s3_put_object(path: str, body: bytes) -> Optional[dict]:
     try:
+        started_at = time.monotonic()
         s3.put_object(Bucket=BUCKET, Key=path, Body=body)
         return {
             "path": path,
@@ -101,8 +123,7 @@ def _s3_put_object(path: str, body: bytes, started_at: float) -> Optional[dict]:
         return None
 
 
-def upload_parquets_to_s3() -> list[dict]:
-    started_at = time.monotonic()
+def upload_parquets_to_s3(force: bool = False) -> list[dict]:
     results: list[dict] = []
     try:
         INMET_STG_DIR = STG_DATA_DIR / "INMET" / "weather"
@@ -111,7 +132,7 @@ def upload_parquets_to_s3() -> list[dict]:
             if not d.is_dir():
                 continue
 
-            if not (INMET_STG_DIR / f"{d.name}.parquet").exists():
+            if force or not (INMET_STG_DIR / f"{d.name}.parquet").exists():
                 files: list[pd.DataFrame] = []
                 for f in d.glob("*.csv"):
                     if not f.is_file() or f.suffix != ".csv":
@@ -122,8 +143,8 @@ def upload_parquets_to_s3() -> list[dict]:
                         continue
                     files.append(df)
 
-                    if len(files) == 0:
-                        continue
+                if len(files) == 0:
+                    continue
 
                 df = pd.concat((f for f in files), ignore_index=True)
                 buffer = io.BytesIO()
@@ -139,7 +160,6 @@ def upload_parquets_to_s3() -> list[dict]:
             result = _s3_put_object(
                 f"{PARQUET_PATH}/{d.name}.parquet",
                 buffer.getvalue(),
-                started_at,
             )
             if result is None:
                 continue
@@ -171,7 +191,7 @@ def _ch_query_s3_test_file(ch: ClickHouse, access: dict) -> Optional[dict]:
             return None
         return {
             "path": f"/{BUCKET}/hello.txt",
-            "rows_count": len(result),
+            "records": len(result),
             "time_to_read": _duration(time.monotonic() - started_at),
         }
     except Exception as e:
@@ -197,7 +217,7 @@ def _ch_query_s3(
             return None
         return {
             "path": path,
-            "rows_count": len(result),
+            "records": len(result),
             "time_to_read": _duration(time.monotonic() - started_at),
         }
     except Exception as e:
@@ -262,9 +282,13 @@ def check_dagster_s3_io() -> bool:
     return result.success
 
 
-def main() -> int:
+def main(argv: list[str] | None = None) -> int:
+    args = parse_args(argv)
+    started = time.monotonic()
     checks = {
         "last_checked_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+        "time_to_process": None,
+        "peak_memory": None,
         "serves_s3_to_boto3": False,
         "serves_s3_to_clickhouse": False,
         "serves_s3_to_dagster": False,
@@ -276,14 +300,14 @@ def main() -> int:
 
     checks["serves_s3_to_boto3"] = create_and_check_bucket()
 
-    uploaded = upload_parquets_to_s3()
+    uploaded = upload_parquets_to_s3(args.force)
     if len(uploaded) > 0:
         checks["uploaded_parquets"] = uploaded
         checks["fits_large_parquet_files"] = True
     else:
         NOTES.append(
-            "WARN: S3 on emulator limits put_object to 16 MiB, a bucktet to 64 MiB,"
-            "and all buckets together to 128 MiB, see issues #67 and #73:"
+            "WARN: S3 on emulator limits put_object to 16 MiB, a bucket to 64 MiB, "
+            "and all buckets together to 128 MiB, see issues #67 and #73: "
             "https://github.com/aws/aws-emulator/issues/"
         )
 
@@ -293,8 +317,9 @@ def main() -> int:
         checks["read_parquets"] = read
 
     checks["serves_s3_to_dagster"] = check_dagster_s3_io()
-
-    checks["notes"].extend(NOTES)
+    checks["notes"] = NOTES
+    checks["time_to_process"] = _duration(time.monotonic() - started)
+    checks["peak_memory"] = _peak_memory()
 
     with open(OUTPUT_DIR / "AWS_emulator.json", "w") as f:
         json.dump(checks, f, indent=4)

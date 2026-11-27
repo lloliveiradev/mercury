@@ -47,8 +47,10 @@ import zipfile
 from gdown.exceptions import DownloadError
 from pathlib import Path
 
-from _prf import PRF_ACCIDENTS_DIR
-from _utils import OUTPUT_DIR, _duration, _size
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # tools/spikes, for _utils
+
+from _prf import PRF_ACCIDENTS_DIR, BASE_COLUMNS
+from _utils import OUTPUT_DIR, _duration, _size, _peak_memory
 
 # "Agrupados por ocorrência" rows of
 # https://www.gov.br/prf/pt-br/acesso-a-informacao/dados-abertos/dados-abertos-da-prf
@@ -62,39 +64,6 @@ FILE_IDS = {
 }
 FILE_NAME = "by-occurrence.csv"
 METADATA_NAME = "PRF_accidents_metadata.json"
-# An allow list: any new or missing column stops the year until someone looks at it.
-COLUMNS = (
-    "id",
-    "data_inversa",
-    "dia_semana",
-    "horario",
-    "uf",
-    "br",
-    "km",
-    "municipio",
-    "causa_acidente",
-    "tipo_acidente",
-    "classificacao_acidente",
-    "fase_dia",
-    "sentido_via",
-    "condicao_metereologica",
-    "tipo_pista",
-    "tracado_via",
-    "uso_solo",
-    "pessoas",
-    "mortos",
-    "feridos_leves",
-    "feridos_graves",
-    "ilesos",
-    "ignorados",
-    "feridos",
-    "veiculos",
-    "latitude",
-    "longitude",
-    "regional",
-    "delegacia",
-    "uop",
-)
 
 NOTES = []
 
@@ -104,18 +73,18 @@ def inspect_csv(path: Path, year: int) -> int:
     with path.open(encoding="latin-1", newline="") as f:
         reader = csv.reader(f, delimiter=";")
         header = next(reader, [])
-        if tuple(header) != COLUMNS:
-            extra = [c for c in header if c not in COLUMNS]
-            missing = [c for c in COLUMNS if c not in header]
+        if tuple(header) != BASE_COLUMNS:
+            extra = [c for c in header if c not in BASE_COLUMNS]
+            missing = [c for c in BASE_COLUMNS if c not in header]
             raise ValueError(
                 f"unexpected columns (extra: {extra}, missing: {missing}, or reordered)"
             )
 
-        date_index = COLUMNS.index("data_inversa")
+        date_index = BASE_COLUMNS.index("data_inversa")
         records = 0
         for row in reader:
             records += 1
-            if len(row) != len(COLUMNS):
+            if len(row) != len(BASE_COLUMNS):
                 raise ValueError(f"line {reader.line_num} has {len(row)} fields")
             if not row[date_index].startswith(f"{year}-"):
                 raise ValueError(
@@ -134,7 +103,7 @@ def describe(path: Path, year: int) -> dict:
         sha256 = hashlib.file_digest(f, "sha256").hexdigest()
     size = path.stat().st_size
     return {
-        "records_count": records,
+        "records": records,
         "size": _size(size),
         "size_bytes": size,
         "sha256": sha256,
@@ -306,12 +275,13 @@ def main(argv: list[str] | None = None) -> int:
     results = dict(sorted(results.items()))
     summary = {
         "last_checked_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
-        "files_count": len(results),
-        "records_count": sum(e["records_count"] for e in results.values()),
-        "size": _size(sum(e["size_bytes"] for e in results.values())),
-        "duration": _duration(time.monotonic() - started),
+        "time_to_process": _duration(time.monotonic() - started),
+        "peak_memory": _peak_memory(),
+        "total_files": len(results),
+        "total_records": sum(e["records_count"] for e in results.values()),
+        "total_size": _size(sum(e["size_bytes"] for e in results.values())),
         "failed": failed,
-        "aborted": aborted,
+        "aborted": aborted or None,
         "notes": NOTES,
     }
 

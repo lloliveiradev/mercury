@@ -17,49 +17,36 @@ import pandas as pd
 import sys
 import time
 
-from jsonschema import validate
+from collections import Counter
+from jsonschema.validators import validator_for
 from jsonschema.exceptions import ValidationError
-from typing import Optional
 
-from _utils import OUTPUT_DIR, _clean_str
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # tools/spikes, for _utils
+
+from _utils import OUTPUT_DIR, _clean_str, _duration, _peak_memory, _rate, _slugify
 from _ibge import IBGE_LOCALITIES_DIR
 from _prf import PRF_ACCIDENTS_DIR, PRF_ACCIDENTS_BY_OCCURRENCE_DICTIONARY_SCHEMA
 
 NOTES = []
+SCHEMA = PRF_ACCIDENTS_BY_OCCURRENCE_DICTIONARY_SCHEMA
+VALIDATOR = validator_for(SCHEMA)(SCHEMA)
+INVALID_EXAMPLES = 5
 
 
-def format_municipality(data: dict) -> dict:
+def get_municipality_key(data: dict) -> str:
     imediate: dict = data.get("regiao-imediata")
     intermediary: dict = imediate.get("regiao-intermediaria") if imediate else {}
     uf: dict = intermediary.get("UF") if intermediary else {}
 
-    return {
-        "id": data.get("id"),
-        "name": _clean_str(data.get("nome"), transform="upper"),
-        "uf": _clean_str(uf.get("sigla"), transform="upper"),
-    }
+    name = _clean_str(data.get("nome"), transform="upper")
+    uf = _clean_str(uf.get("sigla"), transform="upper")
 
+    if not name or not uf:
+        return None
 
-def find_municipality(
-    municipalities: list[dict],
-    name: str,
-    uf: str,
-) -> Optional[dict]:
-    results: list[dict] = []
-
-    results = [
-        m
-        for m in municipalities
-        if m["name"] == _clean_str(name, transform="upper")
-        and m["uf"] == _clean_str(uf, transform="upper")
-    ]
-
-    if len(results) > 1:
-        NOTES.append(
-            "WARN: multiple municipalities found, provide more specific parameters"
-        )
-
-    return results[0] if results else None
+    return f"{name}-{uf}"
 
 
 def main() -> int:
@@ -67,57 +54,33 @@ def main() -> int:
         print("error: PRF accidents raw directory not found", file=sys.stderr)
         return 1
 
+    started = time.time()
     checks = {
         "last_checked_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
-        "schema_validates_records": False,
-        "columns_match_dictionary": False,
-        "municipality_match_by_name": False,
-        "has_weather_conditions": False,
+        "time_to_process": None,
+        "peak_memory": None,
+        "total_files": 0,
+        "total_records": 0,
+        "schema_validated_rows": 0,
+        "municipality_matched_rows": 0,
+        "municipality_matched_rate": 0.0,
+        "rows_without_uf": 0,
+        "unmatched_municipalities_count": 0,
+        "unmatched_municipalities": [],
+        "missing_coordinates_rows": 0,
+        "weather_conditions_count": 0,
+        "weather_conditions_rows": {},
+        "by_year": {},
+        "invalid_schema_rows": 0,
+        "invalid_schema_fields": {},
         "notes": [],
-        "accidents_sample": [],
-        "weather_conditions_sample": [],
     }
-
-    for f in PRF_ACCIDENTS_DIR.glob("*/*.csv"):
-        if f.is_file() and f.suffix == ".csv":
-            df = pd.read_csv(
-                f,
-                sep=";",
-                encoding="latin-1",
-                decimal=",",
-                thousands=".",
-                nrows=10,
-                keep_default_na=False,
-            )
-            checks["accidents_sample"] = df.to_dict(orient="records")[:5]
-            for a in checks["accidents_sample"]:
-                try:
-                    validate(a, PRF_ACCIDENTS_BY_OCCURRENCE_DICTIONARY_SCHEMA)
-                    checks["schema_validates_records"] = True
-                except ValidationError as e:
-                    NOTES.append(f"ERROR: not valid accident data: {e}")
-
-            checks["columns_match_dictionary"] = df.columns.tolist() == list(
-                PRF_ACCIDENTS_BY_OCCURRENCE_DICTIONARY_SCHEMA["properties"].keys()
-            )
-            break  # only one check is enough for now
-
-    weather_conditions = [
-        _clean_str(r["condicao_metereologica"], transform="upper")
-        for r in checks["accidents_sample"]
-    ]
-    weather_conditions = list(set(weather_conditions))
-    weather_conditions.sort()
-    checks["has_weather_conditions"] = len(weather_conditions) > 0
-    checks["weather_conditions_sample"] = weather_conditions[:5]
-    checks["notes"].append(
-        "WARN: The dictionary does not say that there is a enum for weather"
-        "conditions, might have a high cardinality of values.",
-    )
+    weather_conditions: Counter = Counter()
+    unmatched: Counter = Counter()
+    invalid: dict[str, dict] = {}
 
     if not IBGE_LOCALITIES_DIR.exists() or not IBGE_LOCALITIES_DIR.is_dir():
-        checks["municipality_match_by_name"] = False
-        checks["notes"].append("WARN: IBGE localities directory not found")
+        NOTES.append("WARN: IBGE localities directory not found")
     mfile = IBGE_LOCALITIES_DIR / "municipalities.json"
     if (
         not mfile.exists()
@@ -125,42 +88,97 @@ def main() -> int:
         or mfile.suffix != ".json"
         or mfile.stat().st_size == 0
     ):
-        checks["municipality_match_by_name"] = False
-        checks["notes"].append(
-            "WARN: IBGE municipalities file is not valid or is empty"
-        )
+        NOTES.append("WARN: IBGE municipalities file is not valid or is empty")
     mdf = pd.read_json(mfile)
-    municipalities = [format_municipality(m) for m in mdf.to_dict(orient="records")]
+    municipalities = (
+        {get_municipality_key(m): m["id"] for m in mdf.to_dict(orient="records")}
+        if not mdf.empty
+        else {}
+    )
 
-    for a in checks["accidents_sample"]:
-        municipality = find_municipality(municipalities, a["municipio"], a["uf"])
-        if municipality:
-            checks["municipality_match_by_name"] = True
-            a["matched_municipality"] = municipality
+    for f in sorted(PRF_ACCIDENTS_DIR.glob("*/*.csv")):
+        checks["total_files"] += 1
+        df = pd.read_csv(
+            f,
+            sep=";",
+            encoding="latin-1",
+            decimal=",",
+            thousands=".",
+            keep_default_na=False,
+        )
+        if df.empty:
+            continue
+        rows = df.to_dict(orient="records")
+        checks["total_records"] += len(rows)
+        year = {
+            "rows": len(rows),
+            "municipality_matched_rows": 0,
+            "rows_without_uf": 0,
+            "missing_coordinates_rows": 0,
+        }
+        checks["by_year"][f.parent.name] = year
+        for a in rows:
+            weather_conditions[
+                _slugify(a["condicao_metereologica"], transform="upper")
+            ] += 1
+            name = _clean_str(a["municipio"], transform="upper")
+            uf = _clean_str(a["uf"], transform="upper")
+            if not uf:
+                year["rows_without_uf"] += 1
+            elif municipalities.get(f"{name}-{uf}"):
+                year["municipality_matched_rows"] += 1
+            else:
+                unmatched[(name, uf)] += 1
 
-    checks["notes"].extend(NOTES)
+            try:
+                VALIDATOR.validate(a)
+                checks["schema_validated_rows"] += 1
+            except ValidationError as e:
+                field = (
+                    ".".join(str(p) for p in e.absolute_path)
+                    or "Invalid accident structure"
+                )
+                failure = invalid.setdefault(field, {"rows": 0, "examples": []})
+                failure["rows"] += 1
+                if (
+                    len(failure["examples"]) < INVALID_EXAMPLES
+                    and e.message not in failure["examples"]
+                ):
+                    failure["examples"].append(str(e.message))
+        coordinates = df[["latitude", "longitude"]].apply(
+            pd.to_numeric, errors="coerce"
+        )
+        year["missing_coordinates_rows"] = int(coordinates.isna().any(axis=1).sum())
+        year["municipality_matched_rate"] = _rate(
+            year["municipality_matched_rows"], year["rows"], 4
+        )
+        for key in (
+            "municipality_matched_rows",
+            "rows_without_uf",
+            "missing_coordinates_rows",
+        ):
+            checks[key] += year[key]
+
+    checks["invalid_schema_rows"] = sum(f["rows"] for f in invalid.values())
+    checks["invalid_schema_fields"] = invalid
+    checks["unmatched_municipalities_count"] = len(unmatched)
+    checks["unmatched_municipalities"] = [
+        {"municipio": name, "uf": uf, "rows": rows}
+        for (name, uf), rows in unmatched.most_common()
+    ]
+    checks["weather_conditions_count"] = len(weather_conditions)
+    checks["weather_conditions_rows"] = dict(weather_conditions.most_common())
+    checks["municipality_matched_rate"] = _rate(
+        checks["municipality_matched_rows"], checks["total_records"], 4
+    )
+    checks["time_to_process"] = _duration(time.time() - started)
+    checks["peak_memory"] = _peak_memory()
+    checks["notes"] = NOTES
 
     with open(OUTPUT_DIR / "PRF_accidents_shape.json", "w") as f:
         json.dump(checks, f, indent=4)
 
-    print(
-        json.dumps(
-            {
-                k: v
-                for k, v in checks.items()
-                if k
-                in [
-                    "last_checked_at",
-                    "schema_validates_records",
-                    "columns_match_dictionary",
-                    "municipality_match_by_name",
-                    "has_weather_conditions",
-                    "notes",
-                ]
-            },
-            indent=4,
-        )
-    )
+    print(json.dumps(checks, indent=4))
 
     return 0
 

@@ -1,12 +1,29 @@
 import re
+import resource
+import sys
 import unicodedata
 
 from datetime import date, time, datetime
 from pathlib import Path
 from typing import Literal, Optional, Any
 
-OUTPUT_DIR = Path(__file__).resolve().parents[1] / "output"
-STG_DATA_DIR = Path(__file__).resolve().parents[3] / "data" / "stg" / "brazil"
+# Shared by every spike folder. Each script adds this folder to sys.path first.
+SPIKES_DIR = Path(__file__).resolve().parent
+DATA_DIR = SPIKES_DIR.parents[1] / "data"
+
+OUTPUT_DIR = SPIKES_DIR / "output"
+STG_DATA_DIR = DATA_DIR / "stg" / "brazil"
+INMET_WEATHER_DIR = DATA_DIR / "raw" / "brazil" / "INMET" / "weather"
+
+
+CHECKS_TO_PRINT = [
+    "last_checked_at",
+    "time_to_process",
+    "peak_memory",
+    "total_files",
+    "total_records",
+    "total_size",
+]
 
 
 class Blocked(Exception):
@@ -48,10 +65,14 @@ def _clean_str(
         return text.capitalize()
 
 
-def _slugify(text: str, separator: Optional[str] = None) -> str:
+def _slugify(
+    text: str,
+    separator: Optional[str] = None,
+    transform: Transform = "lower",
+) -> str:
     if not separator:
         separator = "-"
-    return _clean_str(text).replace(" ", separator)
+    return _clean_str(text, transform=transform).replace(" ", separator)
 
 
 def _str(value: Any) -> Optional[str]:
@@ -134,3 +155,22 @@ def _duration(seconds: float) -> str:
     if secs > 0:
         combined.append(f"{secs} s")
     return " ".join(combined)
+
+
+def _pct(value: float, total: float, decimals: int = 2) -> float:
+    if total == 0 or value == 0:
+        return 0
+    return round((value / total) * 100, decimals)
+
+
+def _rate(value: float, total: float, decimals: int = 2) -> float:
+    if total == 0 or value == 0:
+        return 0
+    return round(value / total, decimals)
+
+
+def _peak_memory() -> str:
+    """Peak resident memory of this process so far, e.g. ``300.3 MiB``."""
+    peak = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+    # macOS reports bytes, Linux reports kibibytes.
+    return _size(peak if sys.platform == "darwin" else peak * 1024)

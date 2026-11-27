@@ -1,5 +1,7 @@
 {
-    "last_checked_at": "2026-11-26T20:19:18Z",
+    "last_checked_at": "2026-11-27T14:35:52Z",
+    "time_to_process": "1.58 s",
+    "peak_memory": "395.8 MiB",
     "serves_s3_to_boto3": true,
     "serves_s3_to_clickhouse": true,
     "serves_s3_to_dagster": true,
@@ -8,15 +10,15 @@
     "read_parquets": [
         {
             "path": "/mercury-data/hello.txt",
-            "rows_count": 1,
-            "time_to_read": "0.19 s"
+            "records": 1,
+            "time_to_read": "0.23 s"
         }
     ],
     "notes": [
-        "ERROR: Error uploading object raw/brazil/INMET/waether/2022.parquet to s3: An error occurred (413) when calling the PutObject operation: Content Too Large",
-        "ERROR: Error uploading object raw/brazil/INMET/waether/2025.parquet to s3: An error occurred (413) when calling the PutObject operation: Content Too Large",
-        "ERROR: Error uploading object raw/brazil/INMET/waether/2024.parquet to s3: An error occurred (413) when calling the PutObject operation: Content Too Large",
-        "ERROR: Error uploading object raw/brazil/INMET/waether/2023.parquet to s3: An error occurred (413) when calling the PutObject operation: Content Too Large",
-        "WARN: S3 on emulator limits put_object to 16 MiB, a bucktet to 64 MiB,and all buckets together to 128 MiB, see issues #67 and #73:https://github.com/aws/aws-emulator/issues/"
+        "ERROR: Error uploading object raw/brazil/INMET/weather/2022.parquet to s3: An error occurred (413) when calling the PutObject operation: Content Too Large",
+        "ERROR: Error uploading object raw/brazil/INMET/weather/2025.parquet to s3: An error occurred (413) when calling the PutObject operation: Content Too Large",
+        "ERROR: Error uploading object raw/brazil/INMET/weather/2024.parquet to s3: An error occurred (413) when calling the PutObject operation: Content Too Large",
+        "ERROR: Error uploading object raw/brazil/INMET/weather/2023.parquet to s3: An error occurred (413) when calling the PutObject operation: Content Too Large",
+        "WARN: S3 on emulator limits put_object to 16 MiB, a bucket to 64 MiB, and all buckets together to 128 MiB, see issues #67 and #73: https://github.com/aws/aws-emulator/issues/"
     ]
 }

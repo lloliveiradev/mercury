@@ -1,3 +1,4 @@
+import pandas as pd
 import re
 
 from pathlib import Path
@@ -80,6 +81,24 @@ def format_station_data(md: list[dict]) -> Optional[dict]:
     )
 
 
+TEXT_COLUMNS = {"Data", "Hora UTC"}
+
+
+def _measurements(df: pd.DataFrame) -> pd.DataFrame:
+    # INMET writes 0.4 as ",4". One such cell keeps the whole column as text,
+    # and a later file parsed as float cannot share a Parquet column with it.
+    out = df.loc[:, [c for c in df.columns if not str(c).startswith("Unnamed")]]
+    for column in out.columns:
+        if column in TEXT_COLUMNS or pd.api.types.is_numeric_dtype(out[column]):
+            continue
+        text = out[column].astype("string").str.strip()
+        text = text.str.replace(r"^-,", "-0,", regex=True)
+        text = text.str.replace(r"^,", "0,", regex=True)
+        text = text.str.replace(".", "", regex=False).str.replace(",", ".", regex=False)
+        out[column] = pd.to_numeric(text, errors="coerce")
+    return out
+
+
 BASE_COLUMNS = [
     "Data",
     "Hora UTC",
@@ -90,7 +109,7 @@ BASE_COLUMNS = [
     "RADIACAO GLOBAL (Kj/m²)",
     "TEMPERATURA DO AR - BULBO SECO, HORARIA (°C)",
     "TEMPERATURA DO PONTO DE ORVALHO (°C)",
-    "TEMPERATURA MÁXIMANA HORA ANT. (AUT) (°C)",
+    "TEMPERATURA MÁXIMA NA HORA ANT. (AUT) (°C)",
     "TEMPERATURA MÍNIMA NA HORA ANT. (AUT) (°C)",
     "TEMPERATURA ORVALHO MAX. NA HORA ANT. (AUT) (°C)",
     "TEMPERATURA ORVALHO MIN. NA HORA ANT. (AUT) (°C)",
@@ -115,7 +134,7 @@ STATION_COLUMNS = [
 
 INMET_WEATHER_SCHEMA = {
     "title": "INMET Weather",
-    "description": "INMET Weather data",
+    "description": "INMET Weather observations by station and hour",
     "type": "object",
     "properties": {
         "Data": {
@@ -129,20 +148,20 @@ INMET_WEATHER_SCHEMA = {
             "pattern": r"^\d{4} UTC$",
         },
         "PRECIPITAÇÃO TOTAL, HORÁRIO (mm)": {
-            "type": "number",
+            "type": ["number", "null"],
             "description": "Total precipitation in mm observed within the hour",
             "minimum": 0,
         },
         "PRESSAO ATMOSFERICA AO NIVEL DA ESTACAO, HORARIA (mB)": {
-            "type": "number",
+            "type": ["number", "null"],
             "description": "Atmospheric pressure in mB observed within the hour",
         },
         "PRESSÃO ATMOSFERICA MAX.NA HORA ANT. (AUT) (mB)": {
-            "type": "number",
+            "type": ["number", "null"],
             "description": "Maximum atmospheric pressure in mB observed within the hour",
         },
         "PRESSÃO ATMOSFERICA MIN. NA HORA ANT. (AUT) (mB)": {
-            "type": "number",
+            "type": ["number", "null"],
             "description": "Minimum atmospheric pressure in mB observed within the hour",
         },
         "RADIACAO GLOBAL (Kj/m²)": {
@@ -150,51 +169,51 @@ INMET_WEATHER_SCHEMA = {
             "description": "Global radiation in Kj/m² observed within the hour",
         },
         "TEMPERATURA DO AR - BULBO SECO, HORARIA (°C)": {
-            "type": "number",
+            "type": ["number", "null"],
             "description": "Air temperature in °C observed within the hour",
         },
         "TEMPERATURA DO PONTO DE ORVALHO (°C)": {
-            "type": "number",
+            "type": ["number", "null"],
             "description": "Dew temperature in °C observed within the hour",
         },
-        "TEMPERATURA MÁXIMANA HORA ANT. (AUT) (°C)": {
-            "type": "number",
+        "TEMPERATURA MÁXIMA NA HORA ANT. (AUT) (°C)": {
+            "type": ["number", "null"],
             "description": "Maximum air temperature in °C observed within the hour",
         },
         "TEMPERATURA MÍNIMA NA HORA ANT. (AUT) (°C)": {
-            "type": "number",
+            "type": ["number", "null"],
             "description": "Minimum air temperature in °C observed within the hour",
         },
         "TEMPERATURA ORVALHO MAX. NA HORA ANT. (AUT) (°C)": {
-            "type": "number",
+            "type": ["number", "null"],
             "description": "Maximum dew temperature in °C observed within the hour",
         },
         "TEMPERATURA ORVALHO MIN. NA HORA ANT. (AUT) (°C)": {
-            "type": "number",
+            "type": ["number", "null"],
             "description": "Minimum dew temperature in °C observed within the hour",
         },
         "UMIDADE REL. MAX. NA HORA ANT. (AUT) (%)": {
-            "type": "number",
+            "type": ["number", "null"],
             "description": "Maximum relative humidity in % observed within the hour",
         },
         "UMIDADE REL. MIN. NA HORA ANT. (AUT) (%)": {
-            "type": "number",
+            "type": ["number", "null"],
             "description": "Minimum relative humidity in % observed within the hour",
         },
         "UMIDADE RELATIVA DO AR, HORARIA (%)": {
-            "type": "number",
+            "type": ["number", "null"],
             "description": "Relative humidity in % observed within the hour",
         },
         "VENTO, DIREÇÃO HORARIA (gr) (° (gr))": {
-            "type": "number",
+            "type": ["number", "null"],
             "description": "Wind direction in gr observed within the hour",
         },
         "VENTO, RAJADA MAXIMA (m/s)": {
-            "type": "number",
+            "type": ["number", "null"],
             "description": "Maximum wind speed in m/s observed within the hour",
         },
         "VENTO, VELOCIDADE HORARIA (m/s)": {
-            "type": "number",
+            "type": ["number", "null"],
             "description": "Wind speed in m/s observed within the hour",
         },
         # Metadata columns

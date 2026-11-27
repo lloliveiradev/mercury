@@ -15,10 +15,25 @@ import pandas as pd
 import sys
 import time
 
-from _inmet import format_station_data, INMET_WEATHER_DIR
-from _utils import _time, OUTPUT_DIR
+from jsonschema.validators import validator_for
+from jsonschema.exceptions import ValidationError
+
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # tools/spikes, for _utils
+
+from _inmet import (
+    INMET_WEATHER_DIR,
+    INMET_WEATHER_SCHEMA,
+    _measurements,
+    format_station_data,
+)
+from _utils import _duration, _peak_memory, _rate, OUTPUT_DIR
 
 NOTES = []
+VALIDATOR = validator_for(INMET_WEATHER_SCHEMA)(INMET_WEATHER_SCHEMA)
+SCHEMA_SAMPLE_ROWS = 48
+PRECIPITATION = "PRECIPITAÇÃO TOTAL, HORÁRIO (mm)"
 
 
 def main() -> int:
@@ -26,89 +41,134 @@ def main() -> int:
         print("error: INMET weather raw directory not found", file=sys.stderr)
         return 1
 
+    started = time.time()
     checks = {
         "last_checked_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
-        "is_parseable": False,
-        "has_station_data": False,
-        "is_hours_utc": False,
-        "is_hours_diff_1_hour": False,
-        "station_sample": [],
-        "hours_sample": [],
+        "time_to_process": None,
+        "peak_memory": None,
+        "total_files": 0,
+        "total_records": 0,
+        "valid_station_files": 0,
+        "schema_sampled_rows": 0,
+        "schema_validated_rows": 0,
+        "no_precipitation_rows": 0,
+        "no_precipitation_rate": 0,
+        "no_precipitation_files": 0,
+        "mostly_no_precipitation_files": 0,
+        "measured_by_hour_files": 0,
+        "distinct_headers": 0,
+        "by_year": {},
+        "invalid_schema_records": [],
         "notes": [],
     }
 
-    for f in INMET_WEATHER_DIR.glob("*/*.csv"):
-        if f.is_file() and f.suffix == ".csv":
-            md = pd.read_csv(
-                f,
-                sep=";",
-                encoding="latin-1",
-                header=None,
-                nrows=8,
-                names=["key", "value"],
-            )
-            if md.empty:
-                checks["has_station_data"] = False
-                break
-            fmt_md = format_station_data(md.to_dict(orient="records"))
-            checks["has_station_data"] = fmt_md is not None
-            checks["station_sample"] = [fmt_md]
-            if not fmt_md:
-                NOTES.append(f"WARN: station data is not parseable: {f}")
+    headers = set()
 
-            df = pd.read_csv(
-                f,
-                sep=";",
-                encoding="latin-1",
-                decimal=",",
-                thousands=".",
-                skiprows=8,
-                nrows=5,
-            )
-            if df.empty:
-                checks["is_parseable"] = False
-                break
-            checks["is_parseable"] = True
+    for f in sorted(INMET_WEATHER_DIR.glob("*/*.csv")):
+        checks["total_files"] += 1
+        year = checks["by_year"].setdefault(
+            f.parent.name,
+            {
+                "files": 0,
+                "records": 0,
+                "no_precipitation_rows": 0,
+                "no_precipitation_files": 0,
+                "mostly_no_precipitation_files": 0,
+                "measured_by_hour_files": 0,
+            },
+        )
+        year["files"] += 1
+        md = pd.read_csv(
+            f,
+            sep=";",
+            encoding="latin-1",
+            header=None,
+            nrows=8,
+            names=["key", "value"],
+        )
+        if md.empty:
+            continue
+        fmt_md = format_station_data(md.to_dict(orient="records"))
+        if not fmt_md:
+            continue
+        checks["valid_station_files"] += 1
 
-            hours = df["Hora UTC"].tolist()
-            checks["hours_sample"] = hours
-            for h in hours:
-                checks["is_hours_utc"] = _time(h, format="%H%M UTC") is not None
-                break
-            fmt_hours = [_time(h, format="%H%M UTC") for h in hours[:5]]
+        df = pd.read_csv(
+            f,
+            sep=";",
+            encoding="latin-1",
+            decimal=",",
+            thousands=".",
+            skiprows=8,
+            keep_default_na=False,
+        )
+        if df.empty:
+            continue
+        df = _measurements(df)
+        headers.add(tuple(df.columns))
+        checks["total_records"] += len(df)
+        year["records"] += len(df)
+        step = max(1, len(df) // SCHEMA_SAMPLE_ROWS)
+        rows = (
+            df.iloc[::step]
+            .astype(object)
+            .where(df.iloc[::step].notna(), None)
+            .to_dict(orient="records")
+        )
+        checks["schema_sampled_rows"] += len(rows)
+        for r in rows:
+            try:
+                VALIDATOR.validate(r)
+                checks["schema_validated_rows"] += 1
+            except ValidationError as e:
+                field = (
+                    ".".join(str(p) for p in e.absolute_path)
+                    or "Invalid weather data structure"
+                )
+                checks["invalid_schema_records"].append(
+                    {
+                        "record": f"{f.parent.name}/{f.name}:{r['Data']} {r['Hora UTC']}",
+                        "field": field,
+                        "message": str(e.message),
+                    }
+                )
+                continue
+        stamps = pd.to_datetime(
+            df["Data"].astype(str) + " " + df["Hora UTC"].astype(str),
+            format="%Y/%m/%d %H%M UTC",
+            errors="coerce",
+        )
+        steps = stamps.diff().dropna()
+        if stamps.notna().all() and (steps == pd.Timedelta(hours=1)).all():
+            checks["measured_by_hour_files"] += 1
+            year["measured_by_hour_files"] += 1
 
-            for i in range(len(fmt_hours) - 1):
-                diff = fmt_hours[i + 1].hour - fmt_hours[i].hour
-                if diff != 1:
-                    checks["is_hours_diff_1_hour"] = False
-                    break
-            checks["is_hours_diff_1_hour"] = True
+        missing = df[PRECIPITATION].isnull()
+        checks["no_precipitation_rows"] += int(missing.sum())
+        year["no_precipitation_rows"] += int(missing.sum())
+        if missing.all():
+            checks["no_precipitation_files"] += 1
+            year["no_precipitation_files"] += 1
+        elif missing.mean() > 0.5:
+            checks["mostly_no_precipitation_files"] += 1
+            year["mostly_no_precipitation_files"] += 1
 
-            break  # only one check is enough for now
-
-    checks["notes"].extend(NOTES)
+    for year in checks["by_year"].values():
+        year["no_precipitation_rate"] = _rate(
+            year["no_precipitation_rows"], year["records"], 4
+        )
+    checks["distinct_headers"] = len(headers)
+    checks["no_precipitation_rate"] = _rate(
+        checks["no_precipitation_rows"], checks["total_records"], 4
+    )
+    checks["time_to_process"] = _duration(time.time() - started)
+    checks["peak_memory"] = _peak_memory()
+    checks["notes"] = NOTES
 
     with open(OUTPUT_DIR / "INMET_weather_shape.json", "w") as f:
         json.dump(checks, f, indent=4)
 
-    print(
-        json.dumps(
-            {
-                k: v
-                for k, v in checks.items()
-                if k
-                in [
-                    "last_checked_at",
-                    "is_parseable",
-                    "has_station_data",
-                    "is_hours_utc",
-                    "is_hours_diff_1_hour",
-                    "notes",
-                ]
-            },
-            indent=4,
-        )
-    )
+    print(json.dumps(checks, indent=4))
 
     return 0
 

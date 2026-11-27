@@ -61,6 +61,8 @@ from typing import Optional
 from urllib.error import HTTPError
 from urllib.request import Request, urlopen
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # tools/spikes, for _utils
+
 from _inmet import (
     YearError,
     CHUNK,
@@ -73,7 +75,7 @@ from _inmet import (
     RETRIABLE_STATUS,
     WEATHER_URL_TEMPLATE,
 )
-from _utils import Blocked, FetchError, OUTPUT_DIR, _duration, _size
+from _utils import Blocked, FetchError, OUTPUT_DIR, _duration, _peak_memory, _size
 
 METADATA_NAME = "INMET_weather_metadata.json"
 HEADER_LINES = 9  # 8 lines about the station, then the column names
@@ -235,9 +237,10 @@ def unpack(zip_path: Path, temp_dir: Path) -> tuple[int, int]:
         total = 0
         for target_name, info in sorted(members.items()):
             try:
-                with archive.open(info) as source, (temp_dir / target_name).open(
-                    "wb"
-                ) as out:
+                with (
+                    archive.open(info) as source,
+                    (temp_dir / target_name).open("wb") as out,
+                ):
                     shutil.copyfileobj(source, out, CHUNK)
             except zipfile.BadZipFile as error:  # CRC mismatch and similar
                 raise YearError(
@@ -342,8 +345,8 @@ def describe_year(folder: Path) -> dict:
         records += max(lines - HEADER_LINES, 0)
         size += len(body)
     return {
-        "files_count": files,
-        "records_count": records,
+        "files": files,
+        "records": records,
         "size": _size(size),
         "size_bytes": size,
     }
@@ -491,10 +494,11 @@ def main(argv: list[str] | None = None) -> int:
     entries = describe_years(args.output, previous, sources)
     summary = {
         "last_checked_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
-        "files_count": sum(e["files_count"] for e in entries.values()),
-        "records_count": sum(e["records_count"] for e in entries.values()),
-        "size": _size(sum(e["size_bytes"] for e in entries.values())),
-        "duration": _duration(time.monotonic() - started),
+        "time_to_process": _duration(time.monotonic() - started),
+        "peak_memory": _peak_memory(),
+        "total_files": sum(e["files_count"] for e in entries.values()),
+        "total_records": sum(e["records_count"] for e in entries.values()),
+        "total_size": _size(sum(e["size_bytes"] for e in entries.values())),
         "failed": failed,
         "aborted": aborted,
         "notes": NOTES,

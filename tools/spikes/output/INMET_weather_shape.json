@@ -1,27 +1,56 @@
 {
-    "last_checked_at": "2026-11-26T19:36:40Z",
-    "is_parseable": true,
-    "has_station_data": true,
-    "is_hours_utc": true,
-    "is_hours_diff_1_hour": true,
-    "station_sample": [
-        {
-            "region": "NE",
-            "uf": "MA",
-            "station": "SAO LUIS",
-            "wmo_code": "A203",
-            "latitude": -2.52666666,
-            "longitude": -44.21361111,
-            "altitude": 54.8,
-            "foundation_date": "2003-01-29"
+    "last_checked_at": "2026-11-27T14:35:54Z",
+    "time_to_process": "1 min 47 s",
+    "peak_memory": "119.9 MiB",
+    "total_files": 2293,
+    "total_records": 19899048,
+    "valid_station_files": 2293,
+    "schema_sampled_rows": 111777,
+    "schema_validated_rows": 111777,
+    "no_precipitation_rows": 6187960,
+    "no_precipitation_rate": 0.311,
+    "no_precipitation_files": 221,
+    "mostly_no_precipitation_files": 428,
+    "measured_by_hour_files": 2293,
+    "distinct_headers": 1,
+    "by_year": {
+        "2022": {
+            "files": 567,
+            "records": 4948920,
+            "no_precipitation_rows": 1791746,
+            "no_precipitation_files": 41,
+            "mostly_no_precipitation_files": 163,
+            "measured_by_hour_files": 567,
+            "no_precipitation_rate": 0.362
+        },
+        "2023": {
+            "files": 567,
+            "records": 4966920,
+            "no_precipitation_rows": 1104499,
+            "no_precipitation_files": 28,
+            "mostly_no_precipitation_files": 70,
+            "measured_by_hour_files": 567,
+            "no_precipitation_rate": 0.2224
+        },
+        "2024": {
+            "files": 565,
+            "records": 4962960,
+            "no_precipitation_rows": 1304009,
+            "no_precipitation_files": 43,
+            "mostly_no_precipitation_files": 86,
+            "measured_by_hour_files": 565,
+            "no_precipitation_rate": 0.2627
+        },
+        "2025": {
+            "files": 594,
+            "records": 5020248,
+            "no_precipitation_rows": 1987706,
+            "no_precipitation_files": 109,
+            "mostly_no_precipitation_files": 109,
+            "measured_by_hour_files": 594,
+            "no_precipitation_rate": 0.3959
         }
-    ],
-    "hours_sample": [
-        "0000 UTC",
-        "0100 UTC",
-        "0200 UTC",
-        "0300 UTC",
-        "0400 UTC"
-    ],
+    },
+    "invalid_schema_records": [],
     "notes": []
 }

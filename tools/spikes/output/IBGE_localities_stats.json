@@ -1,22 +1,20 @@
 {
-    "last_checked_at": "2026-11-26T19:30:07Z",
-    "files_count": 3,
-    "records_count": 5603,
-    "size": "2.4 MiB",
-    "duration": "0.52 s",
+    "last_checked_at": "2026-11-27T14:35:22Z",
+    "time_to_process": "0.02 s",
+    "peak_memory": "42.7 MiB",
+    "total_files": 3,
+    "total_records": 5603,
+    "total_size": "2.4 MiB",
     "municipalities": {
-        "records_count": 5571,
-        "size": "2.4 MiB",
-        "duration": "0.21 s"
-    },
-    "states": {
-        "records_count": 27,
-        "size": "2.4 KiB",
-        "duration": "0.12 s"
+        "records": 5571,
+        "size": "2.4 MiB"
     },
     "regions": {
-        "records_count": 5,
-        "size": "194 B",
-        "duration": "0.19 s"
+        "records": 5,
+        "size": "194 B"
+    },
+    "states": {
+        "records": 27,
+        "size": "2.4 KiB"
     }
 }

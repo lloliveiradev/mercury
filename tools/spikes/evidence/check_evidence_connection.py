@@ -16,9 +16,11 @@ import sys
 import time
 
 from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # tools/spikes, for _utils
+
+from _utils import OUTPUT_DIR, _duration, _peak_memory
 
 EVIDENCE_DIR = Path(__file__).resolve().parents[1] / "evidence"
-OUTPUT_DIR = Path(__file__).resolve().parents[1] / "output"
 PAGE = EVIDENCE_DIR / "pages" / "home.md"
 PARQUET_PORT = 18787
 
@@ -144,7 +146,9 @@ def query_rows(name: str, sql: str) -> list[dict] | None:
     try:
         rows = json.loads(result.stdout)
     except json.JSONDecodeError:
-        NOTES.append(f"ERROR: {name} did not return JSON: {result.stdout.strip()[:500]}")
+        NOTES.append(
+            f"ERROR: {name} did not return JSON: {result.stdout.strip()[:500]}"
+        )
         return None
     if not isinstance(rows, list) or not rows:
         NOTES.append(f"ERROR: {name} returned no rows")
@@ -190,8 +194,11 @@ def run_named(name: str, queries: dict[str, str]) -> bool:
 
 
 def main() -> int:
+    started = time.monotonic()
     checks = {
         "last_checked_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+        "time_to_process": None,
+        "peak_memory": None,
         "validates_successfully": False,
         "reads_from_clickhouse": False,
         "reads_from_parquet": False,
@@ -208,7 +215,10 @@ def main() -> int:
     finally:
         stop_parquet_reader(reader)
 
-    checks["notes"].extend(NOTES)
+    checks["time_to_process"] = _duration(time.monotonic() - started)
+    checks["peak_memory"] = _peak_memory()
+    checks["notes"] = NOTES
+
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
     with open(OUTPUT_DIR / "EVIDENCE_connection.json", "w") as f:
         json.dump(checks, f, indent=4)

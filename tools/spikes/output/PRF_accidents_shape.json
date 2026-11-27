@@ -1,202 +1,116 @@
 {
-    "last_checked_at": "2026-11-26T19:37:58Z",
-    "schema_validates_records": true,
-    "columns_match_dictionary": true,
-    "municipality_match_by_name": true,
-    "has_weather_conditions": true,
-    "notes": [
-        "WARN: The dictionary does not say that there is a enum for weather conditions, might have a high cardinality of values"
-    ],
-    "accidents_sample": [
+    "last_checked_at": "2026-11-27T14:35:25Z",
+    "time_to_process": "25.0 s",
+    "peak_memory": "447.0 MiB",
+    "total_files": 4,
+    "total_records": 278103,
+    "schema_validated_rows": 278103,
+    "municipality_matched_rows": 277187,
+    "municipality_matched_rate": 0.9967,
+    "rows_without_uf": 0,
+    "unmatched_municipalities_count": 11,
+    "unmatched_municipalities": [
         {
-            "id": 405151,
-            "data_inversa": "2022-01-01",
-            "dia_semana": "s\u00e1bado",
-            "horario": "01:35:00",
-            "uf": "PI",
-            "br": 316,
-            "km": 415.0,
-            "municipio": "MARCOLANDIA",
-            "causa_acidente": "Ingest\u00e3o de \u00e1lcool pelo condutor",
-            "tipo_acidente": "Colis\u00e3o traseira",
-            "classificacao_acidente": "NA",
-            "fase_dia": "Plena Noite",
-            "sentido_via": "Decrescente",
-            "condicao_metereologica": "Nublado",
-            "tipo_pista": "Simples",
-            "tracado_via": "Reta",
-            "uso_solo": "Sim",
-            "pessoas": 3,
-            "mortos": 0,
-            "feridos_leves": 1,
-            "feridos_graves": 0,
-            "ilesos": 1,
-            "ignorados": 1,
-            "feridos": 1,
-            "veiculos": 3,
-            "latitude": -7.43280012,
-            "longitude": -40.68261908,
-            "regional": "SPRF-PI",
-            "delegacia": "DEL04-PI",
-            "uop": "UOP03-DEL04-PI",
-            "matched_municipality": {
-                "id": 2205953,
-                "name": "MARCOLANDIA",
-                "uf": "PI"
-            }
+            "municipio": "SANTO ANTONIO DO LEVERGER",
+            "uf": "MT",
+            "rows": 376
         },
         {
-            "id": 405158,
-            "data_inversa": "2022-01-01",
-            "dia_semana": "s\u00e1bado",
-            "horario": "02:40:00",
-            "uf": "PR",
-            "br": 116,
-            "km": 33.0,
-            "municipio": "CAMPINA GRANDE DO SUL",
-            "causa_acidente": "Ingest\u00e3o de \u00e1lcool pelo condutor",
-            "tipo_acidente": "Tombamento",
-            "classificacao_acidente": "Com V\u00edtimas Fatais",
-            "fase_dia": "Pleno dia",
-            "sentido_via": "Decrescente",
-            "condicao_metereologica": "Nublado",
-            "tipo_pista": "Dupla",
-            "tracado_via": "Curva",
-            "uso_solo": "N\u00e3o",
-            "pessoas": 3,
-            "mortos": 1,
-            "feridos_leves": 1,
-            "feridos_graves": 0,
-            "ilesos": 0,
-            "ignorados": 1,
-            "feridos": 1,
-            "veiculos": 2,
-            "latitude": -25.114403,
-            "longitude": -48.8467554,
-            "regional": "SPRF-PR",
-            "delegacia": "DEL01-PR",
-            "uop": "UOP02-DEL01-PR",
-            "matched_municipality": {
-                "id": 4104006,
-                "name": "CAMPINA GRANDE DO SUL",
-                "uf": "PR"
-            }
+            "municipio": "MUQUEM DE SAO FRANCISCO",
+            "uf": "BA",
+            "rows": 98
         },
         {
-            "id": 405172,
-            "data_inversa": "2022-01-01",
-            "dia_semana": "s\u00e1bado",
-            "horario": "05:22:00",
-            "uf": "MS",
-            "br": 163,
-            "km": 393.0,
-            "municipio": "NOVA ALVORADA DO SUL",
-            "causa_acidente": "Condutor deixou de manter dist\u00e2ncia do ve\u00edculo da frente",
-            "tipo_acidente": "Colis\u00e3o traseira",
-            "classificacao_acidente": "Com V\u00edtimas Feridas",
-            "fase_dia": "Amanhecer",
-            "sentido_via": "Decrescente",
-            "condicao_metereologica": "C\u00e9u Claro",
-            "tipo_pista": "Simples",
-            "tracado_via": "Aclive",
-            "uso_solo": "N\u00e3o",
-            "pessoas": 3,
-            "mortos": 0,
-            "feridos_leves": 1,
-            "feridos_graves": 0,
-            "ilesos": 1,
-            "ignorados": 1,
-            "feridos": 1,
-            "veiculos": 3,
-            "latitude": -21.228445,
-            "longitude": -54.456296,
-            "regional": "SPRF-MS",
-            "delegacia": "DEL02-MS",
-            "uop": "UOP01-DEL02-MS",
-            "matched_municipality": {
-                "id": 5006002,
-                "name": "NOVA ALVORADA DO SUL",
-                "uf": "MS"
-            }
+            "municipio": "ACU",
+            "uf": "RN",
+            "rows": 89
         },
         {
-            "id": 405203,
-            "data_inversa": "2022-01-01",
-            "dia_semana": "s\u00e1bado",
-            "horario": "07:00:00",
-            "uf": "RJ",
-            "br": 101,
-            "km": 457.0,
-            "municipio": "ANGRA DOS REIS",
-            "causa_acidente": "Rea\u00e7\u00e3o tardia ou ineficiente do condutor",
-            "tipo_acidente": "Colis\u00e3o frontal",
-            "classificacao_acidente": "Com V\u00edtimas Feridas",
-            "fase_dia": "Pleno dia",
-            "sentido_via": "Decrescente",
-            "condicao_metereologica": "Chuva",
-            "tipo_pista": "Simples",
-            "tracado_via": "Curva",
-            "uso_solo": "Sim",
-            "pessoas": 2,
-            "mortos": 0,
-            "feridos_leves": 0,
-            "feridos_graves": 1,
-            "ilesos": 1,
-            "ignorados": 0,
-            "feridos": 1,
-            "veiculos": 2,
-            "latitude": -23.03149804,
-            "longitude": -44.17715297,
-            "regional": "SPRF-RJ",
-            "delegacia": "DEL03-RJ",
-            "uop": "UOP03-DEL03-RJ",
-            "matched_municipality": {
-                "id": 3300100,
-                "name": "ANGRA DOS REIS",
-                "uf": "RJ"
-            }
+            "municipio": "FORTALEZA DO TABOCAO",
+            "uf": "TO",
+            "rows": 72
         },
         {
-            "id": 405207,
-            "data_inversa": "2022-01-01",
-            "dia_semana": "s\u00e1bado",
-            "horario": "09:00:00",
-            "uf": "MG",
-            "br": 40,
-            "km": 508.3,
-            "municipio": "RIBEIRAO DAS NEVES",
-            "causa_acidente": "Acumulo de \u00e1gua sobre o pavimento",
-            "tipo_acidente": "Sa\u00edda de leito carro\u00e7\u00e1vel",
-            "classificacao_acidente": "Sem V\u00edtimas",
-            "fase_dia": "Pleno dia",
-            "sentido_via": "Decrescente",
-            "condicao_metereologica": "Chuva",
-            "tipo_pista": "Dupla",
-            "tracado_via": "Reta",
-            "uso_solo": "Sim",
-            "pessoas": 3,
-            "mortos": 0,
-            "feridos_leves": 0,
-            "feridos_graves": 0,
-            "ilesos": 3,
-            "ignorados": 0,
-            "feridos": 0,
-            "veiculos": 1,
-            "latitude": -19.76061249,
-            "longitude": -44.1347544,
-            "regional": "SPRF-MG",
-            "delegacia": "DEL02-MG",
-            "uop": "UOP01-DEL02-MG",
-            "matched_municipality": {
-                "id": 3154606,
-                "name": "RIBEIRAO DAS NEVES",
-                "uf": "MG"
-            }
+            "municipio": "BELEM DE SAO FRANCISCO",
+            "uf": "PE",
+            "rows": 68
+        },
+        {
+            "municipio": "SANTA TERESINHA",
+            "uf": "BA",
+            "rows": 59
+        },
+        {
+            "municipio": "GOVERNADOR EDISON LOBAO",
+            "uf": "MA",
+            "rows": 55
+        },
+        {
+            "municipio": "POXOREO",
+            "uf": "MT",
+            "rows": 40
+        },
+        {
+            "municipio": "ARES",
+            "uf": "RN",
+            "rows": 38
+        },
+        {
+            "municipio": "AUGUSTO SEVERO",
+            "uf": "RN",
+            "rows": 20
+        },
+        {
+            "municipio": "SAO LUIZ",
+            "uf": "RR",
+            "rows": 1
         }
     ],
-    "weather_conditions_sample": [
-        "CEU CLARO",
-        "CHUVA",
-        "NUBLADO"
-    ]
+    "missing_coordinates_rows": 0,
+    "weather_conditions_count": 10,
+    "weather_conditions_rows": {
+        "CEU-CLARO": 175036,
+        "NUBLADO": 43059,
+        "CHUVA": 27688,
+        "SOL": 15846,
+        "GAROACHUVISCO": 9971,
+        "IGNORADO": 3690,
+        "NEVOEIRONEBLINA": 2350,
+        "VENTO": 449,
+        "GRANIZO": 9,
+        "NEVE": 5
+    },
+    "by_year": {
+        "2022": {
+            "rows": 64606,
+            "municipality_matched_rows": 64390,
+            "rows_without_uf": 0,
+            "missing_coordinates_rows": 0,
+            "municipality_matched_rate": 0.9967
+        },
+        "2023": {
+            "rows": 67766,
+            "municipality_matched_rows": 67545,
+            "rows_without_uf": 0,
+            "missing_coordinates_rows": 0,
+            "municipality_matched_rate": 0.9967
+        },
+        "2024": {
+            "rows": 73202,
+            "municipality_matched_rows": 72938,
+            "rows_without_uf": 0,
+            "missing_coordinates_rows": 0,
+            "municipality_matched_rate": 0.9964
+        },
+        "2025": {
+            "rows": 72529,
+            "municipality_matched_rows": 72314,
+            "rows_without_uf": 0,
+            "missing_coordinates_rows": 0,
+            "municipality_matched_rate": 0.997
+        }
+    },
+    "invalid_schema_rows": 0,
+    "invalid_schema_fields": {},
+    "notes": []
 }

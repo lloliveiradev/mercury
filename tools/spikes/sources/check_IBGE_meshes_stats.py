@@ -12,8 +12,12 @@ import json
 import sys
 import time
 
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # tools/spikes, for _utils
+
 from _ibge import count_mesh_coordinates, IBGE_DIR
-from _utils import _size, _duration, OUTPUT_DIR
+from _utils import _size, _duration, _peak_memory, CHECKS_TO_PRINT, OUTPUT_DIR
 
 MESHES_DIR = IBGE_DIR / "meshes"
 
@@ -23,47 +27,35 @@ def main() -> int:
         print("error: meshes directory not found", file=sys.stderr)
         return 1
 
+    started = time.monotonic()
     total_files = 0
     total_size = 0
-    started = time.monotonic()
     results: dict[str, dict] = {}
 
-    for file in MESHES_DIR.glob("*.json"):
-        if file.is_file() and (size := file.stat().st_size) > 0:
-            total_files += 1
-            total_size += size
-            results[file.name.removesuffix(".json")] = {
-                "coordinates_count": count_mesh_coordinates(file.read_bytes()) or 0,
-                "size": _size(size),
-                "duration": None,
-            }
+    for file in sorted(MESHES_DIR.glob("*.json")):
+        size = file.stat().st_size
+        total_files += 1
+        total_size += size
+        results[file.name.removesuffix(".json")] = {
+            "coordinates": count_mesh_coordinates(file.read_bytes()) or 0,
+            "size": _size(size),
+        }
 
-    stats = {
+    checks = {
         "last_checked_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
-        "files_count": total_files,
-        "records_count": total_files,
-        "size": _size(total_size),
-        "duration": _duration(time.monotonic() - started),
+        "time_to_process": _duration(time.monotonic() - started),
+        "peak_memory": _peak_memory(),
+        "total_files": total_files,
+        "total_records": total_files,
+        "total_size": _size(total_size),
         **results,
     }
     with open(OUTPUT_DIR / "IBGE_meshes_stats.json", "w") as f:
-        json.dump(stats, f, indent=4)
+        json.dump(checks, f, indent=4)
 
     print(
         json.dumps(
-            {
-                k: v
-                for k, v in stats.items()
-                if k
-                in [
-                    "last_checked_at",
-                    "files_count",
-                    "records_count",
-                    "size",
-                    "duration",
-                    "notes",
-                ]
-            },
+            {k: v for k, v in checks.items() if k in CHECKS_TO_PRINT},
             indent=4,
         )
     )

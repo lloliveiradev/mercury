@@ -26,13 +26,15 @@ import time
 
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # tools/spikes, for _utils
+
 from _ibge import (
     IBGE_LOCALITIES_DIR,
     LOCALITIES,
     ensure_locality,
     parse_locality_list,
 )
-from _utils import Blocked, FetchError, OUTPUT_DIR, _duration, _size
+from _utils import Blocked, FetchError, OUTPUT_DIR, _duration, _peak_memory, _size
 
 NOTES = []
 
@@ -152,7 +154,7 @@ def main(argv: list[str] | None = None) -> int:
         total_records += records_count
         total_size += len(body)
         entries[kind] = {
-            "records_count": records_count,
+            "records": records_count,
             "size": _size(len(body)),
             # A reused file keeps the time of the run that downloaded it.
             "duration": durations.get(kind) or previous.get(kind, {}).get("duration"),
@@ -160,11 +162,12 @@ def main(argv: list[str] | None = None) -> int:
 
     summary = {
         "last_checked_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
-        "files_count": len(entries),
-        "records_count": total_records,
-        "size": _size(total_size),
-        "duration": _duration(time.monotonic() - started_run),
-        "aborted": aborted,
+        "time_to_process": _duration(time.monotonic() - started_run),
+        "peak_memory": _peak_memory(),
+        "total_files": len(entries),
+        "total_records": total_records,
+        "total_size": _size(total_size),
+        "aborted": aborted or None,
         "notes": NOTES,
     }
 

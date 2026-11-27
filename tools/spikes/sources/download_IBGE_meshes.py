@@ -49,6 +49,8 @@ import time
 from pathlib import Path
 from urllib.parse import urlencode
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # tools/spikes, for _utils
+
 from _ibge import (
     IBGE_LOCALITIES_DIR,
     IBGE_MESH_DIR,
@@ -60,7 +62,7 @@ from _ibge import (
     fetch,
     write_atomic,
 )
-from _utils import Blocked, FetchError, OUTPUT_DIR, _duration, _size
+from _utils import Blocked, FetchError, OUTPUT_DIR, _duration, _peak_memory, _size
 
 NOTES = []
 
@@ -116,7 +118,7 @@ def describe_meshes(directory: Path, durations: dict[str, str]) -> tuple[dict, i
             continue
         total += len(body)
         entries[code] = {
-            "coordinates_count": count,
+            "coordinates": count,
             "size": _size(len(body)),
             "duration": durations.get(code),  # unknown for files from elsewhere
         }
@@ -305,11 +307,13 @@ def main(argv: list[str] | None = None) -> int:
     entries, stored_bytes = describe_meshes(directory, durations)
     summary = {
         "last_checked_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
-        "files_count": len(entries),
-        "records_count": len(entries),
-        "size": _size(stored_bytes),
+        "time_to_process": _duration(time.monotonic() - started),
+        "peak_memory": _peak_memory(),
+        "total_files": len(entries),
+        "total_records": len(entries),
+        "total_size": _size(stored_bytes),
+        "total_codes": len(codes),
         "downloaded_count": downloaded,
-        "duration": _duration(time.monotonic() - started),
         "failed": failed,
         "aborted": aborted or None,
         "notes": NOTES,

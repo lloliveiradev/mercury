@@ -158,3 +158,116 @@ def ensure_locality(
     directory.mkdir(parents=True, exist_ok=True)
     write_atomic(saved, body)
     return records, True
+
+
+GEOJSON_SCHEMA = {
+    "x-schema-url": "https://geojson.org/",
+    "title": "GeoJSON Geometry",
+    "type": "object",
+    "required": ["type"],
+    "oneOf": [
+        {
+            "title": "Point",
+            "required": ["coordinates"],
+            "properties": {
+                "type": {"const": "Point"},
+                "coordinates": {"$ref": "#/definitions/position"},
+                "bbox": {"$ref": "#/definitions/bbox"},
+            },
+        },
+        {
+            "title": "LineString",
+            "required": ["coordinates"],
+            "properties": {
+                "type": {"const": "LineString"},
+                "coordinates": {
+                    "type": "array",
+                    "minItems": 2,
+                    "items": {"$ref": "#/definitions/position"},
+                },
+                "bbox": {"$ref": "#/definitions/bbox"},
+            },
+        },
+        {
+            "title": "Polygon",
+            "required": ["coordinates"],
+            "properties": {
+                "type": {"const": "Polygon"},
+                "coordinates": {
+                    "type": "array",
+                    "items": {
+                        "type": "array",
+                        "minItems": 4,
+                        "items": {"$ref": "#/definitions/position"},
+                    },
+                },
+                "bbox": {"$ref": "#/definitions/bbox"},
+            },
+        },
+        {
+            "title": "MultiPoint",
+            "required": ["coordinates"],
+            "properties": {
+                "type": {"const": "MultiPoint"},
+                "coordinates": {
+                    "type": "array",
+                    "items": {"$ref": "#/definitions/position"},
+                },
+                "bbox": {"$ref": "#/definitions/bbox"},
+            },
+        },
+        {
+            "title": "MultiLineString",
+            "required": ["coordinates"],
+            "properties": {
+                "type": {"const": "MultiLineString"},
+                "coordinates": {
+                    "type": "array",
+                    "items": {
+                        "type": "array",
+                        "minItems": 2,
+                        "items": {"$ref": "#/definitions/position"},
+                    },
+                },
+                "bbox": {"$ref": "#/definitions/bbox"},
+            },
+        },
+        {
+            "title": "MultiPolygon",
+            "required": ["coordinates"],
+            "properties": {
+                "type": {"const": "MultiPolygon"},
+                "coordinates": {
+                    "type": "array",
+                    "items": {
+                        "type": "array",
+                        "items": {
+                            "type": "array",
+                            "minItems": 4,
+                            "items": {"$ref": "#/definitions/position"},
+                        },
+                    },
+                },
+                "bbox": {"$ref": "#/definitions/bbox"},
+            },
+        },
+        {
+            "title": "GeometryCollection",
+            "required": ["geometries"],
+            "properties": {
+                "type": {"const": "GeometryCollection"},
+                "geometries": {"type": "array", "items": {"$ref": "#"}},
+                "bbox": {"$ref": "#/definitions/bbox"},
+            },
+        },
+    ],
+    "definitions": {
+        "position": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 3,
+            "items": {"type": "number"},
+        },
+        "bbox": {"type": "array", "minItems": 4, "items": {"type": "number"}},
+    },
+}

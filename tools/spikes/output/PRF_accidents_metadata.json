@@ -1,14 +1,15 @@
 {
     "last_checked_at": "2026-11-26T18:58:50Z",
-    "files_count": 4,
-    "records_count": 278103,
-    "size": "77.3 MiB",
-    "duration": "27.5 s",
+    "time_to_process": "27.5 s",
+    "peak_memory": null,
+    "total_files": 4,
+    "total_records": 278103,
+    "total_size": "77.3 MiB",
     "failed": [],
     "aborted": null,
     "notes": [],
     "2022": {
-        "records_count": 64606,
+        "records": 64606,
         "size": "17.9 MiB",
         "size_bytes": 18723306,
         "sha256": "d11bbfdec9b5df6f08a083c63acb2c1b4d3bad71d31481d7ce1368d5fa38783a",
@@ -18,7 +19,7 @@
         "duration": "4.99 s"
     },
     "2023": {
-        "records_count": 67766,
+        "records": 67766,
         "size": "18.9 MiB",
         "size_bytes": 19770946,
         "sha256": "2e6a9eac714524822fc3150be4d0614e27c7f14aa674520c94e5d2e4089356dd",
@@ -28,7 +29,7 @@
         "duration": "5.34 s"
     },
     "2024": {
-        "records_count": 73202,
+        "records": 73202,
         "size": "20.4 MiB",
         "size_bytes": 21365616,
         "sha256": "7d26e6f4528c2ca2636a8fea2c5bc8755a0ff6a182d82c238a8793b016e4366d",
@@ -38,7 +39,7 @@
         "duration": "5.29 s"
     },
     "2025": {
-        "records_count": 72529,
+        "records": 72529,
         "size": "20.2 MiB",
         "size_bytes": 21143436,
         "sha256": "bb844d45a07b5b50f5f76011e28f47e370fa6742e9211edac5510dcbe72ce4d8",

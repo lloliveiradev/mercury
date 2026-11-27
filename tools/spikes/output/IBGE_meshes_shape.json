@@ -1,6 +1,10 @@
 {
-    "last_checked_at": "2026-11-26T19:29:02Z",
-    "is_postgis_compatible": true,
-    "is_postgis_loadable": true,
+    "last_checked_at": "2026-11-27T14:35:22Z",
+    "time_to_process": "2.50 s",
+    "peak_memory": "56.9 MiB",
+    "postgis_compatible_rows": 100,
+    "postgis_loadable_rows": 100,
+    "schema_sampled_rows": 100,
+    "sample_compatibility_rate": 1.0,
     "notes": []
 }
