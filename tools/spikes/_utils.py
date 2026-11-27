@@ -15,6 +15,36 @@ OUTPUT_DIR = SPIKES_DIR / "output"
 STG_DATA_DIR = DATA_DIR / "stg" / "brazil"
 INMET_WEATHER_DIR = DATA_DIR / "raw" / "brazil" / "INMET" / "weather"
 
+INMET_WEATHER_CH_STRUCT = [
+    "data String",
+    "hora_utc String",
+    "precipitacao_total_horario_mm Float",
+    "pressao_atmosferica_ao_nivel_da_estacao_horaria_mb Float",
+    "pressao_atmosferica_maxna_hora_ant_aut_mb Float",
+    "pressao_atmosferica_min_na_hora_ant_aut_mb Float",
+    "radiacao_global_kjm2 Float",
+    "temperatura_do_ar_bulbo_seco_horaria_c Float",
+    "temperatura_do_ponto_de_orvalho_c Float",
+    "temperatura_maxima_na_hora_ant_aut_c Float",
+    "temperatura_minima_na_hora_ant_aut_c Float",
+    "temperatura_orvalho_max_na_hora_ant_aut_c Float",
+    "temperatura_orvalho_min_na_hora_ant_aut_c Float",
+    "umidade_rel_max_na_hora_ant_aut Float",
+    "umidade_rel_min_na_hora_ant_aut Float",
+    "umidade_relativa_do_ar_horaria Float",
+    "vento_direcao_horaria_gr_gr Float",
+    "vento_rajada_maxima_ms Float",
+    "vento_velocidade_horaria_ms Float",
+    "regiao String",
+    "uf String",
+    "estacao String",
+    "codigo_wmo String",
+    "latitude String",
+    "longitude String",
+    "altitude String",
+    "data_de_fundacao String",
+    "year Int32",
+]
 
 CHECKS_TO_PRINT = [
     "last_checked_at",

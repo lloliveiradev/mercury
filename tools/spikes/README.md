@@ -49,19 +49,29 @@ Downloads are idempotent. A year or a mesh that is already on disk is skipped un
 .venv/bin/python sources/check_IBGE_meshes_shape.py
 ```
 
-## AWS Emulator
+## S3 stores (A6)
 
-`emulator/check_AWS_emulator.py` checks assumption A6. It creates a bucket and reads `hello.txt` back with boto3, asks ClickHouse `s3()` to read that object, materializes a small DataFrame through Dagster's `S3PickleIOManager`, and tries to upload one Parquet per INMET year. Requires the compose stack and `dagster-aws`.
+`emulator/check_AWS_emulator.py` checks assumption A6 against every store in `S3_SOURCES`, today the AWS Emulator and SeaweedFS. For each store it runs the same four checks and reports them under `stores.<name>`:
+
+| Key                        | What ran                                                                                                |
+| -------------------------- | ------------------------------------------------------------------------------------------------------- |
+| `serves_s3_to_boto3`       | Create the bucket, then put, get and delete `hello.txt` with boto3.                                     |
+| `serves_s3_to_dagster`     | Materialize a small DataFrame and read it back through Dagster's `S3PickleIOManager`.                   |
+| `serves_s3_to_clickhouse`  | ClickHouse `s3()` reads a small text object.                                                            |
+| `fits_large_parquet_files` | Upload one Parquet per INMET year, then ClickHouse `s3()` reads every row and every column of each one. |
+
+`holds_a6` is true when all four pass, and `stores_holding_a6` lists those stores. The year Parquets are built once under `data/stg` and reused; `--force` rebuilds them. The full read brings every row to the Python client on purpose, so expect a few GiB of memory. Requires the compose stack, `dagster-aws`, and a `.env` in this folder with the variables from the `.env.example` files under `docker/`.
 
 ```bash
 .venv/bin/python emulator/check_AWS_emulator.py
+.venv/bin/python emulator/check_AWS_emulator.py --force
 ```
 
 Evidence: `output/AWS_emulator.json`.
 
 ## SeaweedFS
 
-The S3-compatible alternative tested because the emulator refuses large objects. `docker/seaweedfs/compose.yaml` runs `chrislusf/seaweedfs:4.55` as one process (master, volume server, filer and S3 gateway) and is part of the compose stack.
+The S3-compatible store that holds A6; the emulator refuses large objects. `docker/seaweedfs/compose.yaml` runs `chrislusf/seaweedfs:4.55` as one process (master, volume server, filer and S3 gateway) and is part of the compose stack.
 
 | From                | Endpoint                 |
 | ------------------- | ------------------------ |
@@ -69,7 +79,7 @@ The S3-compatible alternative tested because the emulator refuses large objects.
 | ClickHouse `s3()`   | `http://seaweedfs:8333`  |
 | Filer UI, to browse | `http://127.0.0.1:8888/` |
 
-The access key and secret come from `SEAWEEDFS_ACCESS_KEY` and `SEAWEEDFS_SECRET_KEY` (defaults in `docker/seaweedfs/.env.example`). It is plain HTTP with path-style addressing, so no CA bundle is needed. Data lives in the `seaweedfs-data` volume.
+The access key and secret come from `SEAWEEDFS_ACCESS_KEY` and `SEAWEEDFS_SECRET_KEY` (defaults in `docker/seaweedfs/.env.example`). The check also reads `SEAWEEDFS_S3_HOST`, the host name from this machine, and `SEAWEEDFS_CH_HOST`, the host name from the ClickHouse container. It is plain HTTP with path-style addressing, so no CA bundle is needed. Data lives in the `seaweedfs-data` volume.
 
 ## dbt
 
