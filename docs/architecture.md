@@ -42,24 +42,24 @@ DDL ownership: Alembic owns all Postgres DDL, versioned SQL files own the ClickH
 
 The join of weather to accidents is the core engineering problem, and the one most able to bias a result silently. The design constraints are:
 
-- **Where the weather of an accident comes from.** Preferably the nearest station to the accident's coordinates within a distance limit, if phase 00 confirms coordinates. A municipality reference point is only a fallback. The municipality remains the reporting dimension.
-- **One time zone.** INMET states that its station data is in UTC. PRF times are local, and Brazil spans several offsets. Every timestamp is converted by a stated rule before any join, and the conversion has tests. Yearly partitions are by the zone chosen for the analysis, so a local-time year may need data from two INMET files.
-- **Municipality keys.** PRF may give the municipality as a name. Names are matched to IBGE codes by a stated rule, and a quality check reports the unmatched share.
-- **Coverage.** Municipalities and hours without a close station are flagged, not guessed, and reports state the coverage.
+- **Where the weather of an accident comes from.** Preferably the nearest station to the accident's coordinates within a distance limit. Phase 00 confirmed coordinates on every PRF occurrence and on every INMET station file. A municipality reference point is only a fallback. The municipality remains the reporting dimension.
+- **One time zone.** INMET labels every hour as UTC. PRF times are local clock times with no offset in the file, and Brazil spans several offsets. Every timestamp is converted by a stated rule before any join, and the conversion has tests. Yearly partitions are by the zone chosen for the analysis, so a local-time year may need data from two INMET files.
+- **Municipality keys.** PRF gives the municipality as a name. Names are matched to IBGE codes on normalized name plus UF, never on the name alone, and a quality check reports the unmatched share. In phase 00 that rule matched 99.67% of the rows; the rest need an alias table.
+- **Coverage.** Municipalities and hours without a close station are flagged, not guessed, and reports state the coverage. The station set changes by year, and 31.1% of station-hours have no precipitation value: an empty value is missing, not zero.
 
 ## Components
 
-| Component         | Role                                                       | Where             | Phase |
-| ----------------- | ---------------------------------------------------------- | ----------------- | ----- |
-| Pipelines         | Dagster project (Python) and the dbt project of the marts  | `apps/pipelines`  | 01    |
-| Dataset libraries | Manifest and connector per source                          | `libs/datasets`   | 03–04 |
-| Geo library       | Spatial join and distance rules                            | `libs/geo`        | 05    |
-| Quality library   | Reusable contracts and checks                              | `libs/quality`    | 01–05 |
-| Findings library  | Statistical analysis as pure Python                        | `libs/findings`   | 07    |
-| Report            | Evidence project, built from the snapshot                  | `apps/report`     | 08    |
-| Web app           | Next.js exploration app (reserved)                         | `apps/web`        | later |
-| Local stack       | Postgres/PostGIS, ClickHouse, S3-compatible store, Dagster | `infra/docker`    | 01    |
-| Cloud             | S3 and CloudFront for the static site, GitHub OIDC         | `infra/terraform` | 08    |
+| Component         | Role                                                      | Where             | Phase |
+| ----------------- | --------------------------------------------------------- | ----------------- | ----- |
+| Pipelines         | Dagster project (Python) and the dbt project of the marts | `apps/pipelines`  | 01    |
+| Dataset libraries | Manifest and connector per source                         | `libs/datasets`   | 03–04 |
+| Geo library       | Spatial join and distance rules                           | `libs/geo`        | 05    |
+| Quality library   | Reusable contracts and checks                             | `libs/quality`    | 01–05 |
+| Findings library  | Statistical analysis as pure Python                       | `libs/findings`   | 07    |
+| Report            | Evidence project, built from the snapshot                 | `apps/report`     | 08    |
+| Web app           | Next.js exploration app (reserved)                        | `apps/web`        | later |
+| Local stack       | Postgres/PostGIS, ClickHouse, SeaweedFS (S3 API), Dagster | `infra/docker`    | 01    |
+| Cloud             | S3 and CloudFront for the static site, GitHub OIDC        | `infra/terraform` | 08    |
 
 ## Consistency and idempotency
 

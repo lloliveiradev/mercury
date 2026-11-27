@@ -1,13 +1,13 @@
 # Roadmap
 
-Status as of 2026-11-20: design approved by conversation, repository foundation created, no product code. The detail of each phase is in [`specs/`](specs/README.md).
+Status as of 2026-11-27: phase 00 closed, with its results in [`design/source-findings.md`](design/source-findings.md). No product code yet. The detail of each phase is in [`specs/`](specs/README.md).
 
 ## Now
 
-| Phase | Name                              | State                |
-| ----- | --------------------------------- | -------------------- |
-| 00    | Source spike and assumption check | ready, next          |
-| 01    | Walking skeleton                  | ready (spec written) |
+| Phase | Name                              | State       |
+| ----- | --------------------------------- | ----------- |
+| 00    | Source spike and assumption check | done        |
+| 01    | Walking skeleton                  | ready, next |
 
 ## Then, in order
 

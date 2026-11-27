@@ -2,18 +2,18 @@
 
 Downloaded on 2026-11-26 and checked on 2026-11-26 and 2026-11-27 with the scripts in [`tools/spikes`](../../tools/spikes/README.md). Each row points at the JSON those scripts wrote. The PRF and INMET shape checks read every row of every year. Where a check uses a sample, the sample size is stated.
 
-Peak memory is the peak resident memory of each check process on macOS. No download recorded it. A6 is still open: a SeaweedFS container was added to the spike stack, and the retest against it has not been run.
+Peak memory is the peak resident memory of each check process on macOS. No download recorded it. A6 was checked against two stores, the AWS Emulator and SeaweedFS.
 
 ## Assumptions
 
 | #   | Assumption                                                                                | Status    | Evidence                                                                                                                                                                                                                                                                                        |
 | --- | ----------------------------------------------------------------------------------------- | --------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| A1  | Brazil, 2022–2025, fits on a developer laptop (disk, time, memory)                        | confirmed | Unpacked sources are about 1.6 GiB. The heaviest check, the PRF shape check, peaked at 447.0 MiB; the INMET checks stayed near 120 MiB because they read one station file at a time. See the volume table.                                                                                      |
+| A1  | Brazil, 2022–2025, fits on a developer laptop (disk, time, memory)                        | confirmed | Unpacked sources are about 1.6 GiB. The heaviest source check, the PRF shape check, peaked at 447.0 MiB; the INMET checks stayed near 120 MiB because they read one station file at a time. See the volume table.                                                                               |
 | A2  | PRF per-occurrence files have municipality, highway, km and date and time                 | confirmed | The downloader stored 2022–2025 only after the occurrence column allow-list matched, and `failed` is empty. All 278,103 rows pass the dictionary schema, including `municipio`, `br`, `km`, `data_inversa` and `horario`.                                                                       |
 | A3  | PRF files have coordinates                                                                | confirmed | `latitude` and `longitude` are on the allow-list, and no row of the 278,103 lacks either one.                                                                                                                                                                                                   |
 | A4  | INMET catalogue has station coordinates and the yearly files are parseable                | confirmed | Four yearly zips unpacked to 2,293 station CSVs. Every file has a valid preamble (station, WMO code, latitude, longitude) and the same observation header. The schema passed on 111,777 sampled rows, 48 per file. Coordinates come from the file preamble, not from a separate catalogue.      |
 | A5  | INMET provides precipitation hourly for most stations                                     | confirmed | All 2,293 station files step by one hour. 31.1% of the 19,899,048 station-hours have no precipitation value. 221 station files have none at all and 428 lack it in more than half of their hours, so 1,865 files have a value in at least half. The gap changes by year; see the INMET section. |
-| A6  | AWS Emulator serves S3 to boto3, Dagster and ClickHouse `s3()` with large Parquet files   | refuted   | boto3, Dagster's pickle IO manager, and ClickHouse `s3()` on `hello.txt` succeeded. All four year Parquets returned HTTP 413. `fits_large_parquet_files` is false.                                                                                                                              |
+| A6  | AWS Emulator serves S3 to boto3, Dagster and ClickHouse `s3()` with large Parquet files   | refuted   | On the emulator, boto3, Dagster's pickle IO manager and ClickHouse `s3()` on a small object succeeded, and all four year Parquets (59.7 to 72.7 MiB) were refused. On SeaweedFS the same four checks passed, and ClickHouse read every row of the four Parquets.                                |
 | A7  | The dbt adapter for ClickHouse supports the marts we need                                 | confirmed | `dbt debug` and `dbt build` succeeded for one synthetic municipality-hour model and its grain test. The spike pins `dbt-core` 1.12.7 and `dbt-clickhouse` 1.10.4. This does not exercise the real weather-accident mart.                                                                        |
 | A8  | Evidence reads a Parquet snapshot (primary path); ClickHouse only for local development   | confirmed | `evidence validate` passed, and all three page queries returned rows: the ClickHouse mart, the Parquet via the DuckDB reader, and ClickHouse `file()` on that Parquet. Evidence is 0.12.2.                                                                                                      |
 | A9  | PRF records the weather condition per occurrence (a data-quality cross-check)             | confirmed | `condicao_metereologica` is filled on every row. The files hold ten distinct values, listed in the PRF section.                                                                                                                                                                                 |
@@ -127,18 +127,29 @@ The localities API returned 5,571 municipalities. The mesh download wrote 5,570 
 
 `downloaded_count` on that run is 5,566 and `total_codes` is 5,571. The stats re-read finds 5,570 files, so the four HTTP 522 codes already had a file from an earlier run. The one municipality with no mesh is 5101837, which the API answered with HTTP 500 on every attempt.
 
-## Emulator, dbt and Evidence
+## S3 stores, dbt and Evidence
 
-Checked at 2026-11-27T14:35:52Z (`AWS_emulator.json`), on emulator build 1.0.611:
+Checked at 2026-11-27T21:32:18Z (`AWS_emulator.json`). The same four checks ran against the AWS Emulator, build 1.0.611, and SeaweedFS 4.55:
 
-| Client                           | Result                                |
-| -------------------------------- | ------------------------------------- |
-| boto3 put and get of `hello.txt` | succeeded                             |
-| ClickHouse `s3()` on that object | succeeded, 1 row, 0.23 s              |
-| Dagster `S3PickleIOManager`      | succeeded                             |
-| Year Parquet `put_object`        | HTTP 413 on 2022, 2023, 2024 and 2025 |
+| Check                                       | AWS Emulator | SeaweedFS |
+| ------------------------------------------- | ------------ | --------- |
+| boto3 bucket, put, get and delete           | passed       | passed    |
+| Dagster `S3PickleIOManager` round trip      | passed       | passed    |
+| ClickHouse `s3()` on a small text object    | passed       | passed    |
+| Year Parquet `put_object`, then a full read | refused      | passed    |
 
-The note recorded with that run: the emulator limits `put_object` to 16 MiB, a bucket to 64 MiB, and all buckets together to 128 MiB (aws/aws-emulator issues 67 and 73). The pickle the IO manager writes is not Parquet, so ClickHouse was not asked to read a Dagster object. The emulator package is installed from the AWS LTS `latest` URL at image build time, the only one AWS serves: a versioned URL answered HTTP 403 on 2026-11-26. The build these results came from reported version 1.0.611, release date 2026.11.25.
+The emulator limits `put_object` to 16 MiB, a bucket to 64 MiB, and all buckets together to 128 MiB (aws/aws-emulator issues 67 and 73, open on 2026-11-26). The check retries the uploads on every run, so a build that lifts the limit will show up in the output. The emulator package is installed from the AWS LTS `latest` URL at image build time, the only one AWS serves: a versioned URL answered HTTP 403 on 2026-11-26.
+
+On SeaweedFS, per year Parquet. The read is ClickHouse `s3()` selecting every column and returning every row to the Python client:
+
+| Year | Parquet  | Upload | Rows read | Full read |
+| ---- | -------- | ------ | --------- | --------- |
+| 2022 | 59.7 MiB | 2.01 s | 4,948,920 | 22.7 s    |
+| 2023 | 72.7 MiB | 2.85 s | 4,966,920 | 47.9 s    |
+| 2024 | 69.8 MiB | 1.58 s | 4,962,960 | 9.87 s    |
+| 2025 | 60.2 MiB | 1.26 s | 5,020,248 | 12.1 s    |
+
+The row counts equal the INMET station-hours of each year. Read times varied between runs: an earlier run on the same files took 7.6 to 14.6 s per year. That check peaked at 2.8 GiB because it holds a year of rows in the client. The pickle the IO manager writes is not Parquet, so ClickHouse was not asked to read a Dagster object.
 
 dbt, at 2026-11-27T13:56:38Z: debug and build succeeded, notes empty. ClickHouse in the spike compose is `clickhouse/clickhouse-server:24.8-alpine`.
 
@@ -158,8 +169,8 @@ The station set changes by year (565 to 594 files). A station-to-municipality ma
 
 ## Decisions
 
-Keep Brazil 2022–2025, as in ADR-0001. The unpacked sources fit on disk and the downloads finished. No check went above 447.0 MiB while reading one file at a time; a later phase that loads every station file at once still has to watch memory.
+Keep Brazil 2022–2025, as in ADR-0001. The unpacked sources fit on disk and the downloads finished. No source check went above 447.0 MiB while reading one file at a time, and pulling a full year of INMET rows into one Python process took 2.8 GiB; a later phase that loads every station file at once still has to watch memory.
 
-Do not adopt the AWS Emulator as the local lake in ADR-0008. Small S3 calls work from boto3, from Dagster's S3 IO manager, and from ClickHouse `s3()`. A year of INMET Parquet does not upload. SeaweedFS is the candidate: its container is in the spike stack, and the A6 checks have not been run against it. The stand-in is undecided until that run and a superseding ADR.
+Do not adopt the AWS Emulator as the local lake in ADR-0008. Small S3 calls work from boto3, from Dagster's S3 IO manager, and from ClickHouse `s3()`. A year of INMET Parquet does not upload. SeaweedFS passed the same checks, year Parquets included. [ADR-0010](../adr/0010-seaweedfs-local-object-store.md) makes SeaweedFS the local store and supersedes that part of ADR-0008.
 
 The ClickHouse dbt adapter can build and test a mart of this shape. Evidence can read that mart and a Parquet file. The real mart, the station join and the time-zone rule wait for ADR-0009.

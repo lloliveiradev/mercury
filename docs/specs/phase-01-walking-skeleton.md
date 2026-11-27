@@ -2,7 +2,7 @@
 
 - **Status:** ready (starts after phase 00)
 - **Depends on:** 00
-- **Briefs and ADRs:** [ADR-0002](../adr/0002-layered-storage.md), [ADR-0004](../adr/0004-python-and-hybrid-transformation.md), [ADR-0005](../adr/0005-dagster-orchestrator.md), [ADR-0007](../adr/0007-monorepo-layout-testing-ci.md), [ADR-0008](../adr/0008-aws-static-publication-and-local-emulator.md)
+- **Briefs and ADRs:** [ADR-0002](../adr/0002-layered-storage.md), [ADR-0004](../adr/0004-python-and-hybrid-transformation.md), [ADR-0005](../adr/0005-dagster-orchestrator.md), [ADR-0007](../adr/0007-monorepo-layout-testing-ci.md), [ADR-0008](../adr/0008-aws-static-publication-and-local-emulator.md), [ADR-0010](../adr/0010-seaweedfs-local-object-store.md)
 
 ## Goal
 
@@ -11,7 +11,7 @@ An empty pipeline runs end to end through the real tooling, locally and in CI, b
 ## Scope
 
 1. **Toolchain pinned** after checking the vendors' documentation: Python with `uv`, Node with `pnpm`, and the versions recorded in the repository. `CONTRIBUTING.md` is updated.
-2. **Local stack in one command** (`make up`, `make down`, `make bootstrap`): PostgreSQL with PostGIS, ClickHouse, the S3-compatible store chosen in phase 00, and Dagster (webserver, daemon and its metadata database). Health checks on every service. Service definitions are the single source for local and CI.
+2. **Local stack in one command** (`make up`, `make down`, `make bootstrap`): PostgreSQL with PostGIS, ClickHouse, SeaweedFS as the S3-compatible store ([ADR-0010](../adr/0010-seaweedfs-local-object-store.md)), and Dagster (webserver, daemon and its metadata database). Health checks on every service. Service definitions are the single source for local and CI.
 3. **One trivial asset round trip:** a Dagster asset writes a small Parquet file to the S3-compatible store, a second asset loads it into Postgres, a third loads it into ClickHouse, and a test queries all three and checks the counts. Synthetic data only.
 4. **Control tables:** one SQLAlchemy model and one Alembic migration for a `dataset_run` table; the migration runs from `make`, and a test applies it to a clean database.
 5. **Checks wired:** one asset check on the trivial asset, and one dbt model with one test, run through Dagster.
@@ -31,7 +31,7 @@ An empty pipeline runs end to end through the real tooling, locally and in CI, b
 
 - Secrets: only `.env.example` with placeholder values is committed; real values come from the local environment.
 - Container ports are bound to `127.0.0.1`, never to all interfaces.
-- No `latest` image tags; pin images after checking the vendors' documentation. The AWS Emulator is the one exception: AWS publishes no image and serves the package only from `LTS/latest` (a versioned URL answered HTTP 403 on 2026-11-26), so its version cannot be pinned. Build it from its documented Dockerfile, keep the package signature check, and record the installed version with any result that depends on it.
+- No `latest` image tags; pin images after checking the vendors' documentation. The AWS Emulator is not part of this stack (ADR-0010). If a later phase adds it, it is the one exception: AWS publishes no image and serves the package only from `LTS/latest` (a versioned URL answered HTTP 403 on 2026-11-26), so its version cannot be pinned. Build it from its documented Dockerfile, keep the package signature check, and record the installed version with any result that depends on it.
 - Every Makefile target has a `## comment` and appears in `make help`.
 - Update `architecture.md` for what became real, and `CONTRIBUTING.md` for the new setup.
 

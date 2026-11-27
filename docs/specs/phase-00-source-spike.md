@@ -1,6 +1,6 @@
 # Phase 00: Source spike and assumption check
 
-- **Status:** ready
+- **Status:** done (2026-11-27). Results in [`source-findings.md`](../design/source-findings.md); the store decision is [ADR-0010](../adr/0010-seaweedfs-local-object-store.md)
 - **Depends on:** none
 - **Briefs and ADRs:** [brief §9](../design/brief.md#9-assumptions-and-how-phase-00-checks-them), [ADR-0001](../adr/0001-mvp-scope-and-datasets.md), [ADR-0004](../adr/0004-python-and-hybrid-transformation.md), [ADR-0006](../adr/0006-evidence-publication-web-app-deferred.md), [ADR-0008](../adr/0008-aws-static-publication-and-local-emulator.md)
 

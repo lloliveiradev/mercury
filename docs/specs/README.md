@@ -8,7 +8,7 @@ The overall picture, including the phases without a spec yet, is in [`../roadmap
 
 | Phase | Spec                                                          | Depends on | Status                      |
 | ----- | ------------------------------------------------------------- | ---------- | --------------------------- |
-| 00    | [Source spike and assumption check](phase-00-source-spike.md) | none       | ready                       |
+| 00    | [Source spike and assumption check](phase-00-source-spike.md) | none       | done                        |
 | 01    | [Walking skeleton](phase-01-walking-skeleton.md)              | 00         | ready                       |
 | 02    | Spine: IBGE dimensions                                        | 01         | spec written when 01 closes |
 | 03    | INMET ingestion                                               | 02         | spec written when 02 closes |
