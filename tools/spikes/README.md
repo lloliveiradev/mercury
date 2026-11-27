@@ -9,6 +9,8 @@ uv sync
 docker compose up -d
 ```
 
+`_utils.py` in this folder holds the helpers every spike shares (output folder, size, duration, peak memory, text cleaning). Each script adds this folder to `sys.path` before importing it, so the scripts still run as plain files.
+
 `compose.yaml` includes the AWS Emulator, PostGIS and ClickHouse definitions under `docker/`. `compose.override.yaml` is picked up automatically: ClickHouse shares the emulator network so `s3()` can use the emulator certificate. Host ports are ClickHouse `18123`/`19000` and Postgres `15432`.
 
 ## Sources
@@ -25,9 +27,9 @@ Downloads are idempotent. A year or a mesh that is already on disk is skipped un
 | `sources/check_INMET_weather_stats.py`   | Station-file count, row count, size and parse time.                                                                                            | `output/INMET_weather_stats.json`      |
 | `sources/check_IBGE_localities_stats.py` | Record count, size and fetch time of the three locality lists.                                                                                 | `output/IBGE_localities_stats.json`    |
 | `sources/check_IBGE_meshes_stats.py`     | Mesh file count, size and coordinate counts.                                                                                                   | `output/IBGE_meshes_stats.json`        |
-| `sources/check_PRF_accidents_shape.py`   | Columns against the occurrence dictionary, coordinates, weather condition, and a name-plus-UF match to IBGE. Stops after the first CSV.        | `output/PRF_accidents_shape.json`      |
-| `sources/check_INMET_weather_shape.py`   | Station preamble (coordinates included) and whether the first hours are labelled UTC and step by one hour. Stops after the first CSV.          | `output/INMET_weather_shape.json`      |
-| `sources/check_IBGE_meshes_shape.py`     | One mesh as GeoJSON, then `ST_GeomFromGeoJSON` on the spike PostGIS. Requires the compose stack.                                               | `output/IBGE_meshes_shape.json`        |
+| `sources/check_PRF_accidents_shape.py`   | Every row of every year: columns against the occurrence dictionary, missing coordinates, weather conditions, and a name-plus-UF match to IBGE. | `output/PRF_accidents_shape.json`      |
+| `sources/check_INMET_weather_shape.py`   | Every station file: one-hour steps, missing precipitation per row and per file, header variants. The schema is checked on 48 rows per file.    | `output/INMET_weather_shape.json`      |
+| `sources/check_IBGE_meshes_shape.py`     | 100 meshes spread over every state as GeoJSON, then `ST_GeomFromGeoJSON` on the spike PostGIS. Requires the compose stack.                     | `output/IBGE_meshes_shape.json`        |
 
 ```bash
 .venv/bin/python sources/download_PRF_accidents.py                  # 2022 to 2025
@@ -56,6 +58,18 @@ Downloads are idempotent. A year or a mesh that is already on disk is skipped un
 ```
 
 Evidence: `output/AWS_emulator.json`.
+
+## SeaweedFS
+
+The S3-compatible alternative tested because the emulator refuses large objects. `docker/seaweedfs/compose.yaml` runs `chrislusf/seaweedfs:4.55` as one process (master, volume server, filer and S3 gateway) and is part of the compose stack.
+
+| From                | Endpoint                 |
+| ------------------- | ------------------------ |
+| The host            | `http://127.0.0.1:8333`  |
+| ClickHouse `s3()`   | `http://seaweedfs:8333`  |
+| Filer UI, to browse | `http://127.0.0.1:8888/` |
+
+The access key and secret come from `SEAWEEDFS_ACCESS_KEY` and `SEAWEEDFS_SECRET_KEY` (defaults in `docker/seaweedfs/.env.example`). It is plain HTTP with path-style addressing, so no CA bundle is needed. Data lives in the `seaweedfs-data` volume.
 
 ## dbt
 

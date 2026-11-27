@@ -8,3 +8,6 @@ include:
   - path: ./docker/aws-emulator/compose.yaml
   - path: ./docker/postgis/compose.yaml
   - path: ./docker/clickhouse/compose.yaml
+  # The S3-compatible alternative tested after the emulator refused large objects.
+  # ClickHouse shares the emulator's network, so it reaches this one as http://seaweedfs:8333.
+  - path: ./docker/seaweedfs/compose.yaml

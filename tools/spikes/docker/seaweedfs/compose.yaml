@@ -1,0 +1,39 @@
+name: seaweedfs
+
+services:
+  seaweedfs:
+    image: chrislusf/seaweedfs:4.55
+    restart: unless-stopped
+    # One process: master, volume server, filer and the S3 gateway.
+    # Volumes are capped at 1 GiB so a laptop disk is not planned in 30 GiB steps.
+    command:
+      - server
+      - -dir=/data
+      - -ip=seaweedfs
+      - -ip.bind=0.0.0.0
+      - -filer
+      - -s3
+      - -s3.port=8333
+      - -s3.port.iceberg=0
+      - -s3.port.lance=0
+      - -master.volumeSizeLimitMB=1024
+      - -volume.max=0
+    environment:
+      # With no -s3.config, the gateway takes its only identity from these two.
+      AWS_ACCESS_KEY_ID: ${SEAWEEDFS_ACCESS_KEY:-mercury}
+      AWS_SECRET_ACCESS_KEY: ${SEAWEEDFS_SECRET_KEY:-mercury-local-only}
+    ports:
+      # Loopback only. S3 API on 8333; the filer UI on 8888 lists what was stored.
+      - '127.0.0.1:${SEAWEEDFS_S3_PORT:-8333}:8333'
+      - '127.0.0.1:${SEAWEEDFS_FILER_PORT:-8888}:8888'
+    volumes:
+      - seaweedfs-data:/data
+    healthcheck:
+      test: ['CMD', 'wget', '-q', '-O-', 'http://127.0.0.1:8333/healthz']
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 15s
+
+volumes:
+  seaweedfs-data:
