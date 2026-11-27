@@ -17,3 +17,7 @@ skills-lock.json
 
 # Spike outputs are written by the check scripts
 tools/spikes/output/
+
+# Local files that git ignores outside the root .gitignore, which is all Prettier reads
+.impeccable/
+tools/spikes/evidence/sources/**/connection.yaml
