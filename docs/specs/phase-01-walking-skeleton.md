@@ -31,7 +31,7 @@ An empty pipeline runs end to end through the real tooling, locally and in CI, b
 
 - Secrets: only `.env.example` with placeholder values is committed; real values come from the local environment.
 - Container ports are bound to `127.0.0.1`, never to all interfaces.
-- No `latest` image tags; pin images after checking the vendors' documentation. The AWS Emulator has no published image: build it from its documented Dockerfile with the source tag or commit pinned.
+- No `latest` image tags; pin images after checking the vendors' documentation. The AWS Emulator is the one exception: AWS publishes no image and serves the package only from `LTS/latest` (a versioned URL answered HTTP 403 on 2026-11-26), so its version cannot be pinned. Build it from its documented Dockerfile, keep the package signature check, and record the installed version with any result that depends on it.
 - Every Makefile target has a `## comment` and appears in `make help`.
 - Update `architecture.md` for what became real, and `CONTRIBUTING.md` for the new setup.
 
