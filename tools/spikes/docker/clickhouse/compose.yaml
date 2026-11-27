@@ -1,0 +1,30 @@
+name: clickhouse
+
+services:
+  clickhouse:
+    image: clickhouse/clickhouse-server:24.8-alpine
+    restart: unless-stopped
+    environment:
+      CLICKHOUSE_DB: ${CLICKHOUSE_DB:-mercury}
+      CLICKHOUSE_USER: ${CLICKHOUSE_USER:-mercury}
+      CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD:-}
+      CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: '1'
+    ports:
+      # 18123 and 19000 on the host. ClickHouse keeps 8123 and 9000.
+      - '${CLICKHOUSE_HTTP_PORT:-18123}:8123'
+      - '${CLICKHOUSE_NATIVE_PORT:-19000}:9000'
+    volumes:
+      - clickhouse-data:/var/lib/clickhouse
+    ulimits:
+      nofile:
+        soft: 262144
+        hard: 262144
+    healthcheck:
+      test: ['CMD', 'wget', '-q', '-O-', 'http://127.0.0.1:8123/ping']
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 15s
+
+volumes:
+  clickhouse-data:

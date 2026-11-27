@@ -1,0 +1,17 @@
+{
+    "last_checked_at": "2026-11-27T14:22:41Z",
+    "time_to_process": "57.8 s",
+    "peak_memory": "118.4 MiB",
+    "total_files": 2293,
+    "total_records": 19899048,
+    "total_size": "1.5 GiB",
+    "stations_by_year": {
+        "2022": 567,
+        "2023": 567,
+        "2024": 565,
+        "2025": 594
+    },
+    "notes": [
+        "INFO: The years do not have the same number of stations. It may indicate that some stations were not operational during some years, and some may have been added later. Or even that some stations did not reported data to INMET (which is very unlikely, but possible)."
+    ]
+}

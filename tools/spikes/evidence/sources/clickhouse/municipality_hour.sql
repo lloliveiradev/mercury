@@ -1,0 +1,1 @@
+SELECT * FROM mercury.municipality_hour;

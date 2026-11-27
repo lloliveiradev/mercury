@@ -90,31 +90,31 @@ Known coverage biases, to be stated in every report: PRF covers federal highways
 
 ## 5. Decisions
 
-| Decision              | Choice                                                                                                        | ADR                                                              |
-| --------------------- | ------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------- |
-| MVP scope             | IBGE spine, PRF, INMET; Brazil, 2022–2025; ANTT in v2                                                         | [0001](../adr/0001-mvp-scope-and-datasets.md)                    |
-| Storage layers        | Parquet (raw) → Postgres/PostGIS (dimensions, spatial) → ClickHouse (facts, marts)                            | [0002](../adr/0002-layered-storage.md)                           |
-| Analytical engine     | ClickHouse, kept by the owner; benchmark compares the alternatives                                            | [0003](../adr/0003-clickhouse-analytical-engine.md)              |
-| Language, transforms  | Python; SQL files for dimensions and loads; dbt for marts; SQLAlchemy and Alembic for control tables          | [0004](../adr/0004-python-and-hybrid-transformation.md)          |
-| Orchestrator          | Dagster                                                                                                       | [0005](../adr/0005-dagster-orchestrator.md)                      |
-| Visualization         | Evidence now (static, from a snapshot); a Next.js app later                                                   | [0006](../adr/0006-evidence-publication-web-app-deferred.md)     |
-| Repository, tests, CI | Monorepo, uv and pnpm workspaces, Make, lefthook, gitleaks, GitHub Actions, recovery test                     | [0007](../adr/0007-monorepo-layout-testing-ci.md)                |
-| Cloud                 | Terraform: S3 and CloudFront static site with GitHub OIDC; pipeline local; AWS Emulator as the local stand-in | [0008](../adr/0008-aws-static-publication-and-local-emulator.md) |
-| Analysis design       | Unit of analysis, model, time zone, station assignment: open                                                  | ADR-0009, due before phase 05                                    |
+| Decision              | Choice                                                                                                                | ADR                                                                                                                   |
+| --------------------- | --------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| MVP scope             | IBGE spine, PRF, INMET; Brazil, 2022–2025; ANTT in v2                                                                 | [0001](../adr/0001-mvp-scope-and-datasets.md)                                                                         |
+| Storage layers        | Parquet (raw) → Postgres/PostGIS (dimensions, spatial) → ClickHouse (facts, marts)                                    | [0002](../adr/0002-layered-storage.md)                                                                                |
+| Analytical engine     | ClickHouse, kept by the owner; benchmark compares the alternatives                                                    | [0003](../adr/0003-clickhouse-analytical-engine.md)                                                                   |
+| Language, transforms  | Python; SQL files for dimensions and loads; dbt for marts; SQLAlchemy and Alembic for control tables                  | [0004](../adr/0004-python-and-hybrid-transformation.md)                                                               |
+| Orchestrator          | Dagster                                                                                                               | [0005](../adr/0005-dagster-orchestrator.md)                                                                           |
+| Visualization         | Evidence now (static, from a snapshot); a Next.js app later                                                           | [0006](../adr/0006-evidence-publication-web-app-deferred.md)                                                          |
+| Repository, tests, CI | Monorepo, uv and pnpm workspaces, Make, lefthook, gitleaks, GitHub Actions, recovery test                             | [0007](../adr/0007-monorepo-layout-testing-ci.md)                                                                     |
+| Cloud                 | Terraform: S3 and CloudFront static site with GitHub OIDC; pipeline local; SeaweedFS as the local S3-compatible store | [0008](../adr/0008-aws-static-publication-and-local-emulator.md), [0010](../adr/0010-seaweedfs-local-object-store.md) |
+| Analysis design       | Unit of analysis, model, time zone, station assignment: open                                                          | ADR-0009, due before phase 05                                                                                         |
 
 ## 6. Risks and failure modes
 
-| Risk                                                               | Detection                                                    | Containment                                                                     |
-| ------------------------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------------------------- |
-| INMET layout drifts between years (dates, encoding, extra columns) | Contract test per source and year                            | Fail loudly at staging; per-year parsers behind one interface                   |
-| Partial or repeated ingestion                                      | Row-count reconciliation asset checks                        | Partitioned, idempotent assets; raw is immutable and re-runnable                |
-| Station-to-municipality join assigns the wrong weather             | Distance statistics in a quality check                       | Distance limit; municipalities without a close station are flagged, not guessed |
-| Spurious correlation published                                     | Recovery test with planted and null series                   | Controls and multiple-comparison correction are part of the analysis code       |
-| AWS Emulator is incompatible with a client we need                 | Phase 00 compatibility spike                                 | Fallback to an S3-compatible store behind the same endpoint setting (ADR-0008)  |
-| Source terms or files change                                       | Manifest records terms and retrieval date; checksums         | Pin the retrieval date in every published report                                |
-| Credential or real data committed                                  | gitleaks in hook and CI; `data/` ignored                     | Rotate, then rewrite history                                                    |
-| Cloud cost overrun                                                 | Budget alert on the account                                  | Ceiling set before any resource; the pipeline stays local                       |
-| Analysis design                                                    | Unit of analysis, model, time zone, station assignment: open | ADR-0009, due before phase 05                                                   |
+| Risk                                                               | Detection                                                    | Containment                                                                                                                         |
+| ------------------------------------------------------------------ | ------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------- |
+| INMET layout drifts between years (dates, encoding, extra columns) | Contract test per source and year                            | Fail loudly at staging; per-year parsers behind one interface                                                                       |
+| Partial or repeated ingestion                                      | Row-count reconciliation asset checks                        | Partitioned, idempotent assets; raw is immutable and re-runnable                                                                    |
+| Station-to-municipality join assigns the wrong weather             | Distance statistics in a quality check                       | Distance limit; municipalities without a close station are flagged, not guessed                                                     |
+| Spurious correlation published                                     | Recovery test with planted and null series                   | Controls and multiple-comparison correction are part of the analysis code                                                           |
+| AWS Emulator is incompatible with a client we need                 | Phase 00 compatibility spike                                 | Fallback to an S3-compatible store behind the same endpoint setting (ADR-0008). Phase 00 hit this: SeaweedFS replaced it (ADR-0010) |
+| Source terms or files change                                       | Manifest records terms and retrieval date; checksums         | Pin the retrieval date in every published report                                                                                    |
+| Credential or real data committed                                  | gitleaks in hook and CI; `data/` ignored                     | Rotate, then rewrite history                                                                                                        |
+| Cloud cost overrun                                                 | Budget alert on the account                                  | Ceiling set before any resource; the pipeline stays local                                                                           |
+| Analysis design                                                    | Unit of analysis, model, time zone, station assignment: open | ADR-0009, due before phase 05                                                                                                       |
 
 ## 7. Observability plan
 

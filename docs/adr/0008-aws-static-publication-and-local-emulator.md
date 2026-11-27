@@ -1,6 +1,6 @@
 # ADR-0008: Publish the static report on AWS through Terraform and use the AWS Emulator as the local stand-in
 
-- **Status**: Accepted, with a compatibility spike in phase 00
+- **Status**: Accepted. The local stand-in part (decision items 2 and 3) is superseded by [ADR-0010](0010-seaweedfs-local-object-store.md) after the phase 00 spike
 - **Date**: 2026-11-20
 - **Deciders**: Leo Oliveira (owner)
 

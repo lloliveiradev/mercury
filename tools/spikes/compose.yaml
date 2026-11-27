@@ -1,0 +1,13 @@
+name: mercury-spikes
+
+# Assembles the stacks defined under ./docker/. Paths inside an included
+# file stay relative to that file, so `build: .` still finds its Dockerfile.
+# aws-emulator and postgis build a local image. clickhouse publishes an
+# upstream image; it is included because the spike runs against it too.
+include:
+  - path: ./docker/aws-emulator/compose.yaml
+  - path: ./docker/postgis/compose.yaml
+  - path: ./docker/clickhouse/compose.yaml
+  # The S3-compatible alternative tested after the emulator refused large objects.
+  # ClickHouse shares the emulator's network, so it reaches this one as http://seaweedfs:8333.
+  - path: ./docker/seaweedfs/compose.yaml

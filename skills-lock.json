@@ -1,0 +1,47 @@
+{
+  "version": 2,
+  "skills": {
+    "arc-decisions": {
+      "source": "llodev/skills",
+      "commit": "38b454f17036f5a5c3ec7917b94519354d535b17",
+      "sourceType": "github",
+      "skillPath": "skills/arc-decisions/SKILL.md",
+      "computedHash": "17d986dc4b16724638f202c32a0df3384550d06fa78b3b7778f4b6d1ec117a55"
+    },
+    "aws-emulator": {
+      "source": "aws/agent-toolkit-for-aws",
+      "commit": "f805d2e2579f41b48ab411b61fc395ab175701dd",
+      "sourceType": "github",
+      "skillPath": "skills/core-skills/aws-emulator/SKILL.md",
+      "computedHash": "bbdf990abee2043f5da6ceb60d600bce610279c1dc381cc5434abb911e19f919"
+    },
+    "bi-dashboard": {
+      "source": "llodev/skills",
+      "commit": "38b454f17036f5a5c3ec7917b94519354d535b17",
+      "sourceType": "github",
+      "skillPath": "skills/bi-dashboard/SKILL.md",
+      "computedHash": "c59a655b51a7c04bfd03290a186f84d4bf70339dfd6ffce965921cbe91e112d1"
+    },
+    "clickhouse-best-practices": {
+      "source": "clickhouse/agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/clickhouse-best-practices/SKILL.md",
+      "computedHash": "9f89e345eca543aa85077b886f84bdc4c984fead28673a48319e354e29d9dacd",
+      "commit": "1008fd74c0912e2f4819d52324af8a2fac2b74c1"
+    },
+    "postgres-best-practices": {
+      "source": "neondatabase/postgres-skills",
+      "commit": "27fe45e0f71ea89a6eaf9ea4d2e4068957c81c26",
+      "sourceType": "github",
+      "skillPath": "skills/postgres-best-practices/SKILL.md",
+      "computedHash": "831a3fa1d77af721028e9decf8ecf2ea0f841430d584e1d8b372580e94e64662"
+    },
+    "terrashark": {
+      "source": "LukasNiessen/terrashark",
+      "commit": "21f2c18b912818b6a8e2b7bdbf25a275ecb894b1",
+      "sourceType": "github",
+      "skillPath": "SKILL.md",
+      "computedHash": "21cbcfe5800e56ff34dfc283bdd556704a46af62114048b4c768d08ee814ff6d"
+    }
+  }
+}

@@ -1,0 +1,25 @@
+{
+    "last_checked_at": "2026-11-26T19:25:04Z",
+    "time_to_process": "1.72 s",
+    "peak_memory": null,
+    "total_files": 3,
+    "total_records": 5603,
+    "total_size": "2.4 MiB",
+    "aborted": null,
+    "notes": [],
+    "municipalities": {
+        "records": 5571,
+        "size": "2.4 MiB",
+        "duration": "0.33 s"
+    },
+    "states": {
+        "records": 27,
+        "size": "2.4 KiB",
+        "duration": "0.12 s"
+    },
+    "regions": {
+        "records": 5,
+        "size": "194 B",
+        "duration": "0.12 s"
+    }
+}

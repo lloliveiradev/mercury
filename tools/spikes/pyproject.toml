@@ -1,0 +1,29 @@
+# Dependencies of the throwaway phase 00 spike scripts. Set up from this folder:
+#
+#   uv sync
+#
+# The JavaScript dependencies of the Evidence spike are in evidence/package.json,
+# and the services the checks talk to run from compose.yaml.
+
+[project]
+name = "mercury-spikes"
+version = "0.1.0"
+requires-python = "==3.13.*"  # the only version these spikes were run on
+dependencies = [
+    # sources/
+    "gdown==6.5.2",
+    "jsonschema==4.26.0",
+    "pandas==3.1.1",
+    "psycopg[binary]==3.3.9",
+    # emulator/ (pyarrow writes the Parquet files)
+    "boto3==1.44.11",
+    "clickhouse-connect==1.13.0",
+    "dagster==1.13.31",
+    "dagster-aws==0.29.31",
+    "pyarrow==26.0.1",
+    # emulator/ and sources/
+    "python-dotenv==1.2.4",
+    # dbt/ (the check runs the `dbt` command)
+    "dbt-clickhouse==1.10.4",
+    "dbt-core==1.12.7",
+]

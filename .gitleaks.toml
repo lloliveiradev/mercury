@@ -1,0 +1,12 @@
+# gitleaks configuration: the default rules plus the allowlist below.
+[extend]
+useDefault = true
+
+# Vendored agent skill documentation shows a curl example with the
+# placeholder password "your-password". It is not a credential.
+[allowlist]
+description = "Placeholder credentials in vendored skill documentation"
+paths = [
+  '''^\.agents/skills/clickhouse-best-practices/AGENTS\.md$''',
+  '''^\.agents/skills/clickhouse-best-practices/rules/agent-connect-mcp\.md$''',
+]

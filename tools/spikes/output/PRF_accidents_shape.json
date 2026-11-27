@@ -1,0 +1,116 @@
+{
+    "last_checked_at": "2026-11-27T14:35:25Z",
+    "time_to_process": "25.0 s",
+    "peak_memory": "447.0 MiB",
+    "total_files": 4,
+    "total_records": 278103,
+    "schema_validated_rows": 278103,
+    "municipality_matched_rows": 277187,
+    "municipality_matched_rate": 0.9967,
+    "rows_without_uf": 0,
+    "unmatched_municipalities_count": 11,
+    "unmatched_municipalities": [
+        {
+            "municipio": "SANTO ANTONIO DO LEVERGER",
+            "uf": "MT",
+            "rows": 376
+        },
+        {
+            "municipio": "MUQUEM DE SAO FRANCISCO",
+            "uf": "BA",
+            "rows": 98
+        },
+        {
+            "municipio": "ACU",
+            "uf": "RN",
+            "rows": 89
+        },
+        {
+            "municipio": "FORTALEZA DO TABOCAO",
+            "uf": "TO",
+            "rows": 72
+        },
+        {
+            "municipio": "BELEM DE SAO FRANCISCO",
+            "uf": "PE",
+            "rows": 68
+        },
+        {
+            "municipio": "SANTA TERESINHA",
+            "uf": "BA",
+            "rows": 59
+        },
+        {
+            "municipio": "GOVERNADOR EDISON LOBAO",
+            "uf": "MA",
+            "rows": 55
+        },
+        {
+            "municipio": "POXOREO",
+            "uf": "MT",
+            "rows": 40
+        },
+        {
+            "municipio": "ARES",
+            "uf": "RN",
+            "rows": 38
+        },
+        {
+            "municipio": "AUGUSTO SEVERO",
+            "uf": "RN",
+            "rows": 20
+        },
+        {
+            "municipio": "SAO LUIZ",
+            "uf": "RR",
+            "rows": 1
+        }
+    ],
+    "missing_coordinates_rows": 0,
+    "weather_conditions_count": 10,
+    "weather_conditions_rows": {
+        "CEU-CLARO": 175036,
+        "NUBLADO": 43059,
+        "CHUVA": 27688,
+        "SOL": 15846,
+        "GAROACHUVISCO": 9971,
+        "IGNORADO": 3690,
+        "NEVOEIRONEBLINA": 2350,
+        "VENTO": 449,
+        "GRANIZO": 9,
+        "NEVE": 5
+    },
+    "by_year": {
+        "2022": {
+            "rows": 64606,
+            "municipality_matched_rows": 64390,
+            "rows_without_uf": 0,
+            "missing_coordinates_rows": 0,
+            "municipality_matched_rate": 0.9967
+        },
+        "2023": {
+            "rows": 67766,
+            "municipality_matched_rows": 67545,
+            "rows_without_uf": 0,
+            "missing_coordinates_rows": 0,
+            "municipality_matched_rate": 0.9967
+        },
+        "2024": {
+            "rows": 73202,
+            "municipality_matched_rows": 72938,
+            "rows_without_uf": 0,
+            "missing_coordinates_rows": 0,
+            "municipality_matched_rate": 0.9964
+        },
+        "2025": {
+            "rows": 72529,
+            "municipality_matched_rows": 72314,
+            "rows_without_uf": 0,
+            "missing_coordinates_rows": 0,
+            "municipality_matched_rate": 0.997
+        }
+    },
+    "invalid_schema_rows": 0,
+    "invalid_schema_fields": {},
+    "notes": []
+}

@@ -1,0 +1,8 @@
+{
+    "last_checked_at": "2026-11-27T13:56:38Z",
+    "time_to_process": "4.47 s",
+    "peak_memory": "19.8 MiB",
+    "dbt_debugs_successfully": true,
+    "dbt_builds_successfully": true,
+    "notes": []
+}

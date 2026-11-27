@@ -1,0 +1,13 @@
+models:
+  - name: municipality_hour
+    description: One row per municipality and hour. Null precipitation means no station.
+    columns:
+      - name: municipality_id
+        data_tests:
+          - not_null
+      - name: observed_hour
+        data_tests:
+          - not_null
+      - name: accident_count
+        data_tests:
+          - not_null

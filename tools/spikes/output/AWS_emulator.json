@@ -1,0 +1,111 @@
+{
+    "last_checked_at": "2026-11-27T21:32:18Z",
+    "time_to_process": "1 min 51 s",
+    "peak_memory": "2.8 GiB",
+    "stores_holding_a6": [
+        "SeaweedFS"
+    ],
+    "stores": {
+        "aws_emulator": {
+            "name": "AWS Emulator",
+            "holds_a6": false,
+            "serves_s3_to_boto3": true,
+            "serves_s3_to_dagster": true,
+            "serves_s3_to_clickhouse": true,
+            "fits_large_parquet_files": false,
+            "parquets": [
+                {
+                    "path": "mercury-data/raw/brazil/INMET/weather/2022.parquet",
+                    "size": "59.7 MiB",
+                    "time_to_build": null,
+                    "uploaded": false,
+                    "time_to_upload": null,
+                    "records_read_by_clickhouse": null,
+                    "time_to_read_by_clickhouse": null
+                },
+                {
+                    "path": "mercury-data/raw/brazil/INMET/weather/2023.parquet",
+                    "size": "72.7 MiB",
+                    "time_to_build": null,
+                    "uploaded": false,
+                    "time_to_upload": null,
+                    "records_read_by_clickhouse": null,
+                    "time_to_read_by_clickhouse": null
+                },
+                {
+                    "path": "mercury-data/raw/brazil/INMET/weather/2024.parquet",
+                    "size": "69.8 MiB",
+                    "time_to_build": null,
+                    "uploaded": false,
+                    "time_to_upload": null,
+                    "records_read_by_clickhouse": null,
+                    "time_to_read_by_clickhouse": null
+                },
+                {
+                    "path": "mercury-data/raw/brazil/INMET/weather/2025.parquet",
+                    "size": "60.2 MiB",
+                    "time_to_build": null,
+                    "uploaded": false,
+                    "time_to_upload": null,
+                    "records_read_by_clickhouse": null,
+                    "time_to_read_by_clickhouse": null
+                }
+            ],
+            "notes": [
+                "ERROR: AWS Emulator refused raw/brazil/INMET/weather/2022.parquet (59.7 MiB)",
+                "ERROR: AWS Emulator refused raw/brazil/INMET/weather/2023.parquet (72.7 MiB)",
+                "ERROR: AWS Emulator refused raw/brazil/INMET/weather/2024.parquet (69.8 MiB)",
+                "ERROR: AWS Emulator refused raw/brazil/INMET/weather/2025.parquet (60.2 MiB)",
+                "WARN: S3 on AWS Emulator limits put_object to 16 MiB, a bucket to 64 MiB, and all buckets together to 128 MiB, see issues #67 and #73: https://github.com/aws/aws-emulator/issues/"
+            ]
+        },
+        "seaweedfs": {
+            "name": "SeaweedFS",
+            "holds_a6": true,
+            "serves_s3_to_boto3": true,
+            "serves_s3_to_dagster": true,
+            "serves_s3_to_clickhouse": true,
+            "fits_large_parquet_files": true,
+            "parquets": [
+                {
+                    "path": "mercury-data/raw/brazil/INMET/weather/2022.parquet",
+                    "size": "59.7 MiB",
+                    "time_to_build": null,
+                    "uploaded": true,
+                    "time_to_upload": "2.01 s",
+                    "records_read_by_clickhouse": 4948920,
+                    "time_to_read_by_clickhouse": "22.7 s"
+                },
+                {
+                    "path": "mercury-data/raw/brazil/INMET/weather/2023.parquet",
+                    "size": "72.7 MiB",
+                    "time_to_build": null,
+                    "uploaded": true,
+                    "time_to_upload": "2.85 s",
+                    "records_read_by_clickhouse": 4966920,
+                    "time_to_read_by_clickhouse": "47.9 s"
+                },
+                {
+                    "path": "mercury-data/raw/brazil/INMET/weather/2024.parquet",
+                    "size": "69.8 MiB",
+                    "time_to_build": null,
+                    "uploaded": true,
+                    "time_to_upload": "1.58 s",
+                    "records_read_by_clickhouse": 4962960,
+                    "time_to_read_by_clickhouse": "9.87 s"
+                },
+                {
+                    "path": "mercury-data/raw/brazil/INMET/weather/2025.parquet",
+                    "size": "60.2 MiB",
+                    "time_to_build": null,
+                    "uploaded": true,
+                    "time_to_upload": "1.26 s",
+                    "records_read_by_clickhouse": 5020248,
+                    "time_to_read_by_clickhouse": "12.1 s"
+                }
+            ],
+            "notes": []
+        }
+    },
+    "notes": []
+}

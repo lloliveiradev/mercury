@@ -1,0 +1,55 @@
+{
+    "last_checked_at": "2026-11-26T19:20:44Z",
+    "time_to_process": "59.0 s",
+    "peak_memory": null,
+    "total_files": 2293,
+    "total_records": 19899048,
+    "total_size": "1.5 GiB",
+    "failed": [],
+    "aborted": null,
+    "notes": [],
+    "2022": {
+        "files": 567,
+        "records": 4948920,
+        "size": "354.7 MiB",
+        "size_bytes": 371900715,
+        "source_url": "https://portal.inmet.gov.br/uploads/dadoshistoricos/2022.zip",
+        "source_size": "86.2 MiB",
+        "source_sha256": "292d997e0589486404827055f887327732f11d0bed9b5507952e6cad9bea286b",
+        "retrieved_at": "2026-11-26T19:19:59Z",
+        "duration": "14.1 s"
+    },
+    "2023": {
+        "files": 567,
+        "records": 4966920,
+        "size": "396.3 MiB",
+        "size_bytes": 415560362,
+        "source_url": "https://portal.inmet.gov.br/uploads/dadoshistoricos/2023.zip",
+        "source_size": "102.1 MiB",
+        "source_sha256": "b17391392cc1219151977cc2c46a7ab24368d821fd780311da9fff62a627bfd8",
+        "retrieved_at": "2026-11-26T19:20:15Z",
+        "duration": "9.96 s"
+    },
+    "2024": {
+        "files": 565,
+        "records": 4962960,
+        "size": "386.7 MiB",
+        "size_bytes": 405471533,
+        "source_url": "https://portal.inmet.gov.br/uploads/dadoshistoricos/2024.zip",
+        "source_size": "98.0 MiB",
+        "source_sha256": "0a7f89de57427f79b6f82943b2f7f2e932202d9253e34bf25629ed088d108ae7",
+        "retrieved_at": "2026-11-26T19:20:29Z",
+        "duration": "8.11 s"
+    },
+    "2025": {
+        "files": 594,
+        "records": 5020248,
+        "size": "359.2 MiB",
+        "size_bytes": 376671813,
+        "source_url": "https://portal.inmet.gov.br/uploads/dadoshistoricos/2025.zip",
+        "source_size": "86.7 MiB",
+        "source_sha256": "14988d0b736ba969b48881589f602f3a6d7e97b95bd1de934456851fdac2cb89",
+        "retrieved_at": "2026-11-26T19:20:41Z",
+        "duration": "6.95 s"
+    }
+}
